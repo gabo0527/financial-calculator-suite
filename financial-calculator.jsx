@@ -729,7 +729,7 @@ const FinancialCalculatorApp = () => {
 
         {/* Main Content Area */}
         <div className="px-6 pb-12">
-          <div className="max-w-7xl mx-auto"
+          <div className="max-w-7xl mx-auto">
             {/* Budget Tab */}
             {activeTab === 'budget' && (
               <div className="space-y-6">
