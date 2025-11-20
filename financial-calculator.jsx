@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calculator, Home, Car, DollarSign, Shield, X, Save, FolderOpen, GitCompare, PiggyBank, Menu, ChevronRight, Info } from 'lucide-react';
+import { Calculator, Home, Car, DollarSign, TrendingUp, Shield, X, Save, FolderOpen, GitCompare, PiggyBank, Menu, ChevronRight, Info } from 'lucide-react';
 
 const FinancialCalculatorApp = () => {
   const [activeTab, setActiveTab] = useState('mortgage');
