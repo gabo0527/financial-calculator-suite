@@ -12,7 +12,326 @@ import {
   Legend,
   ResponsiveContainer
 } from 'recharts';
+// ===== Real Estate ROI / Cap Rate / Cash-on-Cash Calculator =====
 
+const roiParseNumber = (value, fallback = 0) => {
+  if (value === undefined || value === null) return fallback;
+  const n = parseFloat(String(value).replace(/,/g, ''));
+  return isNaN(n) ? fallback : n;
+};
+
+const roiFormatCurrency = (n) =>
+  n.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+
+const roiFormatPercent = (n) => `${(n * 100).toFixed(1)}%`;
+
+function RealEstateRoiCalculator() {
+  const [purchasePrice, setPurchasePrice] = useState('300000');
+  const [closingCosts, setClosingCosts] = useState('9000');
+  const [rehabCosts, setRehabCosts] = useState('15000');
+
+  const [monthlyRent, setMonthlyRent] = useState('2500');
+  const [otherIncome, setOtherIncome] = useState('0');
+  const [vacancyRate, setVacancyRate] = useState('5'); // %
+
+  const [opExPercent, setOpExPercent] = useState('35'); // %
+
+  const [downPaymentPercent, setDownPaymentPercent] = useState('20'); // %
+  const [interestRate, setInterestRate] = useState('6.5'); // annual %
+  const [loanTermYears, setLoanTermYears] = useState('30');
+
+  const P = roiParseNumber(purchasePrice);
+  const CC = roiParseNumber(closingCosts);
+  const rehab = roiParseNumber(rehabCosts);
+
+  const rent = roiParseNumber(monthlyRent);
+  const other = roiParseNumber(otherIncome);
+  const vacPct = roiParseNumber(vacancyRate) / 100;
+  const opPct = roiParseNumber(opExPercent) / 100;
+
+  const dpPct = roiParseNumber(downPaymentPercent) / 100;
+  const rate = roiParseNumber(interestRate) / 100;
+  const years = roiParseNumber(loanTermYears);
+
+  let results = null;
+
+  if (P > 0 && years > 0) {
+    const loanAmount = P * (1 - dpPct);
+    const downPayment = P * dpPct;
+
+    const r = rate / 12;
+    const n = years * 12;
+
+    const monthlyDebtService =
+      r === 0 ? loanAmount / n : loanAmount * (r / (1 - Math.pow(1 + r, -n)));
+
+    const annualDebtService = monthlyDebtService * 12;
+
+    const gsi = (rent + other) * 12;
+    const vacancyLoss = gsi * vacPct;
+    const egi = gsi - vacancyLoss;
+
+    const opEx = egi * opPct;
+    const noi = egi - opEx;
+
+    const totalCashInvested = downPayment + CC + rehab;
+
+    const capRate = P > 0 ? noi / P : 0;
+    const annualCashFlow = noi - annualDebtService;
+    const cashOnCash =
+      totalCashInvested > 0 ? annualCashFlow / totalCashInvested : 0;
+
+    const dscr = annualDebtService > 0 ? noi / annualDebtService : 0;
+
+    results = {
+      loanAmount,
+      downPayment,
+      monthlyDebtService,
+      annualDebtService,
+      gsi,
+      vacancyLoss,
+      egi,
+      opEx,
+      noi,
+      totalCashInvested,
+      capRate,
+      annualCashFlow,
+      cashOnCash,
+      dscr,
+    };
+  }
+
+  return (
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold text-slate-900">
+        Real Estate ROI, Cap Rate & Cash-on-Cash
+      </h2>
+      <p className="text-sm text-slate-600 max-w-2xl">
+        Estimate cap rate, cash-on-cash return, and DSCR to understand if a rental
+        or commercial property is worth the risk. No judgment, just numbers.
+      </p>
+
+      <div className="grid gap-6 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
+        {/* Inputs */}
+        <div className="space-y-6">
+          <div className="rounded-2xl bg-white p-5 shadow border border-slate-100">
+            <h3 className="text-lg font-semibold text-slate-900 mb-3">
+              Property & One-Time Costs
+            </h3>
+            <div className="grid gap-4 md:grid-cols-3">
+              <RoiInputField
+                label="Purchase price"
+                prefix="$"
+                value={purchasePrice}
+                onChange={setPurchasePrice}
+              />
+              <RoiInputField
+                label="Closing costs"
+                prefix="$"
+                value={closingCosts}
+                onChange={setClosingCosts}
+              />
+              <RoiInputField
+                label="Rehab / initial work"
+                prefix="$"
+                value={rehabCosts}
+                onChange={setRehabCosts}
+              />
+            </div>
+          </div>
+
+          <div className="rounded-2xl bg-white p-5 shadow border border-slate-100">
+            <h3 className="text-lg font-semibold text-slate-900 mb-3">
+              Income & Vacancy
+            </h3>
+            <div className="grid gap-4 md:grid-cols-3">
+              <RoiInputField
+                label="Monthly rent"
+                prefix="$"
+                value={monthlyRent}
+                onChange={setMonthlyRent}
+              />
+              <RoiInputField
+                label="Other monthly income"
+                prefix="$"
+                value={otherIncome}
+                onChange={setOtherIncome}
+              />
+              <RoiInputField
+                label="Vacancy rate"
+                suffix="%"
+                value={vacancyRate}
+                onChange={setVacancyRate}
+              />
+            </div>
+          </div>
+
+          <div className="rounded-2xl bg-white p-5 shadow border border-slate-100">
+            <h3 className="text-lg font-semibold text-slate-900 mb-3">
+              Operating Expenses & Financing
+            </h3>
+            <div className="grid gap-4 md:grid-cols-4">
+              <RoiInputField
+                label="OpEx as % of EGI"
+                suffix="%"
+                value={opExPercent}
+                onChange={setOpExPercent}
+              />
+              <RoiInputField
+                label="Down payment"
+                suffix="%"
+                value={downPaymentPercent}
+                onChange={setDownPaymentPercent}
+              />
+              <RoiInputField
+                label="Interest rate"
+                suffix="%"
+                value={interestRate}
+                onChange={setInterestRate}
+              />
+              <RoiInputField
+                label="Loan term (years)"
+                value={loanTermYears}
+                onChange={setLoanTermYears}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Results */}
+        <div className="space-y-6">
+          <div className="rounded-2xl bg-white p-5 shadow border border-slate-100">
+            <h3 className="text-lg font-semibold text-slate-900 mb-3">
+              Key Metrics (Year 1)
+            </h3>
+
+            {!results ? (
+              <p className="text-sm text-slate-500">
+                Enter values to calculate.
+              </p>
+            ) : (
+              <>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <RoiMetricTile
+                    label="Cap Rate"
+                    value={roiFormatPercent(results.capRate)}
+                  />
+                  <RoiMetricTile
+                    label="Cash-on-Cash"
+                    value={roiFormatPercent(results.cashOnCash)}
+                  />
+                  <RoiMetricTile
+                    label="DSCR"
+                    value={results.dscr.toFixed(2)}
+                    emphasize={
+                      results.dscr < 1.2
+                        ? 'bad'
+                        : results.dscr < 1.3
+                        ? 'warn'
+                        : 'good'
+                    }
+                  />
+                  <RoiMetricTile
+                    label="Annual Cash Flow"
+                    value={roiFormatCurrency(results.annualCashFlow)}
+                    emphasize={results.annualCashFlow < 0 ? 'bad' : 'good'}
+                  />
+                </div>
+
+                <hr className="my-4" />
+
+                <dl className="space-y-1 text-sm text-slate-700">
+                  <RoiRow label="NOI" value={roiFormatCurrency(results.noi)} />
+                  <RoiRow
+                    label="Annual Debt Service"
+                    value={roiFormatCurrency(results.annualDebtService)}
+                  />
+                  <RoiRow
+                    label="Total Cash Invested"
+                    value={roiFormatCurrency(results.totalCashInvested)}
+                  />
+                  <RoiRow
+                    label="Loan Amount"
+                    value={roiFormatCurrency(results.loanAmount)}
+                  />
+                </dl>
+              </>
+            )}
+          </div>
+
+          <div className="rounded-2xl bg-slate-900 p-4 text-sm text-slate-100">
+            <p className="font-semibold mb-2">How to read this:</p>
+            <ul className="space-y-1 list-disc list-inside">
+              <li>
+                <span className="font-semibold">Cap Rate</span> is your
+                property&apos;s return assuming you paid all cash.
+              </li>
+              <li>
+                <span className="font-semibold">Cash-on-Cash</span> is your
+                return on the actual cash you invested (down payment + costs).
+              </li>
+              <li>
+                <span className="font-semibold">DSCR</span> measures how safely
+                NOI covers loan payments. Many lenders like &gt; 1.20.
+              </li>
+              <li>
+                <span className="font-semibold">Annual Cash Flow</span> is money
+                left after operating expenses and loan payments, before taxes.
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// --- small UI helpers for this calculator only ---
+
+function RoiInputField({ label, value, onChange, prefix, suffix }) {
+  return (
+    <label className="flex flex-col gap-1 text-sm text-slate-700">
+      <span>{label}</span>
+      <div className="flex items-center rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+        {prefix && <span className="mr-1 text-slate-400 text-xs">{prefix}</span>}
+        <input
+          className="w-full bg-transparent text-sm text-slate-900 outline-none"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          inputMode="decimal"
+        />
+        {suffix && <span className="ml-1 text-slate-400 text-xs">{suffix}</span>}
+      </div>
+    </label>
+  );
+}
+
+function RoiMetricTile({ label, value, emphasize }) {
+  let color = 'text-slate-900';
+  if (emphasize === 'good') color = 'text-emerald-600';
+  if (emphasize === 'bad') color = 'text-rose-600';
+  if (emphasize === 'warn') color = 'text-amber-600';
+
+  return (
+    <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+      <div className="text-xs uppercase tracking-wide text-slate-500 mb-1">
+        {label}
+      </div>
+      <div className={`text-xl font-semibold ${color} font-mono`}>
+        {value}
+      </div>
+    </div>
+  );
+}
+
+function RoiRow({ label, value }) {
+  return (
+    <div className="flex justify-between gap-4">
+      <dt>{label}</dt>
+      <dd className="font-mono">{value}</dd>
+    </div>
+  );
+}
 const FinancialCalculatorApp = () => {
   const [activeTab, setActiveTab] = useState('mortgage');
   const [showPrivacy, setShowPrivacy] = useState(false);
