@@ -879,7 +879,7 @@ const FinancialCalculatorApp = () => {
           </div>
         )}
 
-        {/* Modern Pill Navigation */}
+              {/* Modern Pill Navigation */}
         <div className="bg-white shadow-sm border-b border-slate-200 mb-6">
           <div className="max-w-7xl mx-auto px-6">
             <div className="flex gap-2 overflow-x-auto py-4 scrollbar-hide">
@@ -894,6 +894,7 @@ const FinancialCalculatorApp = () => {
                 <DollarSign size={20} />
                 Budget
               </button>
+
               <button
                 onClick={() => setActiveTab('auto')}
                 className={`flex items-center gap-2 px-6 py-3 rounded-full font-semibold transition-all whitespace-nowrap ${
@@ -905,6 +906,7 @@ const FinancialCalculatorApp = () => {
                 <Car size={20} />
                 Auto Loan
               </button>
+
               <button
                 onClick={() => setActiveTab('mortgage')}
                 className={`flex items-center gap-2 px-6 py-3 rounded-full font-semibold transition-all whitespace-nowrap ${
@@ -916,6 +918,7 @@ const FinancialCalculatorApp = () => {
                 <Home size={20} />
                 Mortgage
               </button>
+
               <button
                 onClick={() => setActiveTab('debt')}
                 className={`flex items-center gap-2 px-6 py-3 rounded-full font-semibold transition-all whitespace-nowrap ${
@@ -924,9 +927,10 @@ const FinancialCalculatorApp = () => {
                     : 'bg-slate-100 text-slate-700 hover:bg-slate-200 hover:scale-105'
                 }`}
               >
-                <Calculator size={20} />
+                <Shield size={20} />
                 Debt Payoff
               </button>
+
               <button
                 onClick={() => setActiveTab('savings')}
                 className={`flex items-center gap-2 px-6 py-3 rounded-full font-semibold transition-all whitespace-nowrap ${
@@ -938,7 +942,22 @@ const FinancialCalculatorApp = () => {
                 <PiggyBank size={20} />
                 Savings
               </button>
+
+              {/* NEW TAB: Real Estate ROI */}
+              <button
+                onClick={() => setActiveTab('realEstateRoi')}
+                className={`flex items-center gap-2 px-6 py-3 rounded-full font-semibold transition-all whitespace-nowrap ${
+                  activeTab === 'realEstateRoi'
+                    ? 'bg-gradient-to-r from-blue-600 to-teal-600 text-white shadow-lg transform scale-105'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200 hover:scale-105'
+                }`}
+              >
+                <TrendingUp size={20} />
+                Real Estate ROI
+              </button>
             </div>
+          </div>
+        </div>
           </div>
         </div>
 
