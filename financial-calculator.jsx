@@ -1634,7 +1634,68 @@ function SavingsTab() {
 }
 
 /* ---------- Main app ---------- */
+const MoneyMapLogo = ({ size = 32 }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 32 32"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <defs>
+      <linearGradient
+        id="mmGradient"
+        x1="4"
+        y1="28"
+        x2="28"
+        y2="4"
+        gradientUnits="userSpaceOnUse"
+      >
+        <stop stopColor="#0A6375" />
+        <stop offset="0.5" stopColor="#0C3C75" />
+        <stop offset="1" stopColor="#19A39D" />
+      </linearGradient>
+    </defs>
 
+    {/* Rounded square background stroke */}
+    <rect
+      x="3"
+      y="3"
+      width="26"
+      height="26"
+      rx="8"
+      stroke="#0A1A2F"
+      strokeWidth="1.4"
+      fill="none"
+    />
+
+    {/* Lower momentum arc (path / journey) */}
+    <path
+      d="M6 22C9.2 19 11.5 17.5 13.8 16.6C16.1 15.8 18.2 15.8 20.2 16.3C22.2 16.8 24 17.8 26 19.5"
+      stroke="url(#mmGradient)"
+      strokeWidth="2.1"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+
+    {/* Upper momentum arc (growth / analytics) */}
+    <path
+      d="M8 18.5C10.3 16 12.4 14.7 14.4 14.0C16.4 13.3 18.3 13.2 20.1 13.6C21.9 14.0 23.5 14.9 25 16.3"
+      stroke="url(#mmGradient)"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+
+    {/* End-point node (target / goal) */}
+    <circle
+      cx="25.2"
+      cy="16.3"
+      r="1.4"
+      fill="#19A39D"
+    />
+  </svg>
+);
 const FinancialCalculatorApp = () => {
   const [activeTab, setActiveTab] = useState('budget');
   const [showPrivacy, setShowPrivacy] = useState(false);
