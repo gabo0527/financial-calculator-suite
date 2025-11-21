@@ -1239,7 +1239,10 @@ const FinancialCalculatorApp = () => {
     </div>
   </div>
 )}
-
+{/* REAL ESTATE ROI TAB */}
+{activeTab === 'realEstateRoi' && (
+  <RealEstateRoiCalculator />
+)}
 {/* AUTO LOAN TAB, MORTGAGE TAB, DEBT TAB - I'll keep your existing code for these */}
 {/* Keeping your existing Auto Loan, Mortgage, and Debt tabs exactly as they are */}
 {/* For brevity, I'm truncating here but the full file will include all your existing tabs */}
