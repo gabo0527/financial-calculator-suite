@@ -1278,57 +1278,53 @@ function DebtPayoffTab() {
               </button>
             </div>
             <div className="space-y-2 text-xs md:text-sm">
-              {debts.map((d, i) => (
-                <div
-                  key={i}
-                  className="grid grid-cols-[1.4fr,0.9fr,0.8fr,0.8fr,auto] gap-2 items-center"
-                >
-                  <input
-                    className="px-2 py-2 border border-slate-300 rounded-lg"
-                    placeholder="Name (Visa, Car loan…)"
-                    value={d.name}
-                    onChange={(e) =>
-                      updateDebt(i, 'name', e.target.value)
-                    }
-                  />
-                  <input
-                    type="number"
-                    className="px-2 py-2 border border-slate-300 rounded-lg"
-                    placeholder="Balance"
-                    value={d.balance}
-                    onChange={(e) =>
-                      updateDebt(i, 'balance', e.target.value)
-                    }
-                  />
-                  <input
-                    type="number"
-                    className="px-2 py-2 border border-slate-300 rounded-lg"
-                    placeholder="Rate %"
-                    value={d.rate}
-                    onChange={(e) =>
-                      updateDebt(i, 'rate', e.target.value)
-                    }
-                  />
-                  <input
-                    type="number"
-                    className="px-2 py-2 border border-slate-300 rounded-lg"
-                    placeholder="Min pay"
-                    value={d.minPayment}
-                    onChange={(e) =>
-                      updateDebt(i, 'minPayment', e.target.value)
-                    }
-                  />
-                  {debts.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removeDebt(i)}
-                      className="text-rose-500 hover:text-rose-700"
-                    >
-                      <X size={16} />
-                    </button>
-                  )}
-                </div>
-              ))}
+          {debts.map((d, i) => (
+  <div
+    key={i}
+    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.5fr,1fr,1fr,1fr,auto] gap-3 items-center"
+  >
+    <input
+      className="w-full px-2 py-2 border border-slate-300 rounded-lg"
+      placeholder="Name (Visa, Car loan…)"
+      value={d.name}
+      onChange={(e) => updateDebt(i, 'name', e.target.value)}
+    />
+
+    <input
+      type="number"
+      className="w-full px-2 py-2 border border-slate-300 rounded-lg"
+      placeholder="Balance"
+      value={d.balance}
+      onChange={(e) => updateDebt(i, 'balance', e.target.value)}
+    />
+
+    <input
+      type="number"
+      className="w-full px-2 py-2 border border-slate-300 rounded-lg"
+      placeholder="Rate %"
+      value={d.rate}
+      onChange={(e) => updateDebt(i, 'rate', e.target.value)}
+    />
+
+    <input
+      type="number"
+      className="w-full px-2 py-2 border border-slate-300 rounded-lg"
+      placeholder="Min pay"
+      value={d.minPayment}
+      onChange={(e) => updateDebt(i, 'minPayment', e.target.value)}
+    />
+
+    {debts.length > 1 && (
+      <button
+        type="button"
+        onClick={() => removeDebt(i)}
+        className="text-slate-400 hover:text-red-500 justify-self-end"
+      >
+        <X size={18} />
+      </button>
+    )}
+  </div>
+))}
             </div>
             <div className="grid grid-cols-2 gap-3 pt-2 border-t border-slate-100 mt-3">
               <label className="text-xs md:text-sm text-slate-700">
