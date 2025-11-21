@@ -191,7 +191,7 @@ function RealEstateRoiCalculator() {
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-slate-900">
-        Real Estate ROI, Cap Rate &amp; Cash-on-Cash
+        Real Estate ROI
       </h2>
       <p className="text-sm text-slate-600 max-w-2xl">
         Estimate cap rate, cash-on-cash return, and DSCR to understand if a
