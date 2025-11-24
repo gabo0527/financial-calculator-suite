@@ -2216,15 +2216,22 @@ const FinancialCalculatorApp = () => {
           </div>
         </div>
 
-        {/* Main content */}
-        <main className="max-w-7xl mx-auto px-6 py-8 space-y-8">
-          {activeTab === 'budget' && <BudgetTab />}
-          {activeTab === 'auto' && <AutoLoanTab />}
-          {activeTab === 'mortgage' && <MortgageTab />}
-          {activeTab === 'debt' && <DebtPayoffTab />}
-          {activeTab === 'savings' && <SavingsTab />}
-          {activeTab === 'health' && <FinancialHealthTab />}
-          {activeTab === 'roi' && <RealEstateRoiCalculator />}
+               {/* Main content */}
+        <main className="max-w-7xl mx-auto px-6 py-8">
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,2.2fr)_minmax(260px,1fr)] items-start">
+            {/* Left: active calculator */}
+            <div className="space-y-8">
+              {activeTab === 'budget' && <BudgetTab />}
+              {activeTab === 'auto' && <AutoLoanTab />}
+              {activeTab === 'mortgage' && <MortgageTab />}
+              {activeTab === 'debt' && <DebtPayoffTab />}
+              {activeTab === 'savings' && <SavingsTab />}
+              {activeTab === 'roi' && <RealEstateRoiCalculator />}
+            </div>
+
+            {/* Right: contextual tips + overview */}
+            <SidePanel activeTab={activeTab} />
+          </div>
         </main>
       </div>
     </div>
