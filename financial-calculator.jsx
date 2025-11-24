@@ -2100,163 +2100,259 @@ const MoneyMapLogo = ({ size = 32 }) => (
   </svg>
 );
 
+/* ---------- Main app with premium sidebar layout ---------- */
+
+const MoneyMapLogo = ({ size = 32 }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 32 32"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <defs>
+      <linearGradient
+        id="mmGradient"
+        x1="4"
+        y1="28"
+        x2="28"
+        y2="4"
+        gradientUnits="userSpaceOnUse"
+      >
+        <stop stopColor="#0A6375" />
+        <stop offset="0.5" stopColor="#0C3C75" />
+        <stop offset="1" stopColor="#19A39D" />
+      </linearGradient>
+    </defs>
+
+    {/* Rounded square background stroke */}
+    <rect
+      x="3"
+      y="3"
+      width="26"
+      height="26"
+      rx="8"
+      stroke="#0A1A2F"
+      strokeWidth="1.4"
+      fill="none"
+    />
+
+    {/* Lower momentum arc (path / journey) */}
+    <path
+      d="M6 22C9.2 19 11.5 17.5 13.8 16.6C16.1 15.8 18.2 15.8 20.2 16.3C22.2 16.8 24 17.8 26 19.5"
+      stroke="url(#mmGradient)"
+      strokeWidth="2.1"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+
+    {/* Upper momentum arc (growth / analytics) */}
+    <path
+      d="M8 18.5C10.3 16 12.4 14.7 14.4 14.0C16.4 13.3 18.3 13.2 20.1 13.6C21.9 14.0 23.5 14.9 25 16.3"
+      stroke="url(#mmGradient)"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+
+    {/* End-point node (target / goal) */}
+    <circle cx="25.2" cy="16.3" r="1.4" fill="#19A39D" />
+  </svg>
+);
+
 const FinancialCalculatorApp = () => {
   const [activeTab, setActiveTab] = useState('budget');
   const [showPrivacy, setShowPrivacy] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <header className="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-40">
-          <div className="max-w-7xl mx-auto px-6 py-4">
-            <div className="flex justify-between items-center">
-              {/* Left side: brand */}
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-white border border-slate-200 shadow-sm">
-                  <MoneyMapLogo size={28} />
-                </div>
-                <div>
-                  <h1 className="text-2xl font-bold bg-gradient-to-r from-[#0A6375] via-[#0C3C75] to-[#19A39D] bg-clip-text text-transparent">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 py-6 px-3 sm:px-6">
+      <div className="max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-[260px,minmax(0,1fr)] rounded-3xl bg-white/90 backdrop-blur border border-slate-100 shadow-[0_24px_70px_rgba(15,23,42,0.45)] overflow-hidden">
+          {/* Sidebar */}
+          <aside className="bg-slate-900 text-slate-100 p-5 md:p-6 flex flex-col gap-6">
+            {/* Brand */}
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-2xl bg-slate-950/60 border border-slate-700">
+                <MoneyMapLogo size={28} />
+              </div>
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-2">
+                  <h1 className="text-lg font-semibold tracking-tight">
                     MoneyMap
                   </h1>
-                  <p className="text-xs text-slate-600">
-                    Chart your financial future—quietly, on your own terms.
-                  </p>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] uppercase tracking-[0.15em] bg-slate-800 text-slate-300 border border-slate-700">
+                    Beta
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-400">
+                  Quiet calculators for real-life money decisions.
+                </p>
+              </div>
+            </div>
+
+            {/* Nav sections */}
+            <nav className="flex-1 space-y-6 mt-2">
+              {/* Personal tools */}
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500 mb-2">
+                  Personal
+                </p>
+                <div className="space-y-1">
+                  <TabButton
+                    icon={DollarSign}
+                    label="Budget"
+                    active={activeTab === 'budget'}
+                    onClick={() => setActiveTab('budget')}
+                  />
+                  <TabButton
+                    icon={Car}
+                    label="Auto loan"
+                    active={activeTab === 'auto'}
+                    onClick={() => setActiveTab('auto')}
+                  />
+                  <TabButton
+                    icon={Home}
+                    label="Mortgage"
+                    active={activeTab === 'mortgage'}
+                    onClick={() => setActiveTab('mortgage')}
+                  />
+                  <TabButton
+                    icon={Shield}
+                    label="Debt payoff"
+                    active={activeTab === 'debt'}
+                    onClick={() => setActiveTab('debt')}
+                  />
+                  <TabButton
+                    icon={PiggyBankIcon}
+                    label="Savings & investing"
+                    active={activeTab === 'savings'}
+                    onClick={() => setActiveTab('savings')}
+                  />
                 </div>
               </div>
-              {/* Right side: privacy */}
-              <div className="flex items-center gap-3">
+
+              {/* Real estate / investing */}
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500 mb-2">
+                  Real estate &amp; investing
+                </p>
+                <div className="space-y-1">
+                  <TabButton
+                    icon={TrendingUp}
+                    label="Real estate ROI"
+                    active={activeTab === 'roi'}
+                    onClick={() => setActiveTab('roi')}
+                  />
+                </div>
+              </div>
+
+              {/* Business – placeholder for future tools */}
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500 mb-2">
+                  Business (coming soon)
+                </p>
                 <button
-                  onClick={() => setShowPrivacy(true)}
-                  className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-full text-xs font-medium hover:bg-emerald-100 border border-emerald-100"
+                  type="button"
+                  disabled
+                  className="w-full px-3 py-2.5 rounded-xl border border-dashed border-slate-700/80 text-[11px] text-slate-500 flex items-center justify-between cursor-not-allowed"
                 >
-                  <Shield size={14} />
-                  <span>How your data is handled</span>
+                  <span className="flex items-center gap-2">
+                    <BarChart3 size={14} className="opacity-60" />
+                    Cash flow runway
+                  </span>
+                  <span className="text-[10px] uppercase tracking-[0.16em]">
+                    Soon
+                  </span>
                 </button>
               </div>
-            </div>
-          </div>
-        </header>
+            </nav>
 
-        {/* Privacy modal */}
-        {showPrivacy && (
-          <div className="fixed inset-0 bg-slate-900/40 flex items-center justify-center z-50">
-            <div className="bg-white max-w-lg w-full mx-4 rounded-2xl shadow-xl p-5 relative">
+            {/* Privacy + footer copy */}
+            <div className="space-y-2 text-[11px] text-slate-500">
               <button
-                className="absolute top-3 right-3 text-slate-400 hover:text-slate-600"
-                onClick={() => setShowPrivacy(false)}
+                type="button"
+                onClick={() => setShowPrivacy(true)}
+                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-emerald-500/40 bg-emerald-500/10 text-emerald-200 text-[11px] font-medium hover:bg-emerald-500/20 transition-colors"
               >
-                <X size={18} />
+                <Shield size={12} />
+                <span>How your data is handled</span>
               </button>
-              <h2 className="text-lg font-semibold text-slate-900 mb-2">
-                Privacy first
-              </h2>
-              <p className="text-sm text-slate-700 mb-3">
-                Nothing you type here is sent to a server for calculations. The
-                math runs in your browser. You can close the tab and it&apos;s
-                gone.
+              <p className="leading-snug">
+                All math runs in your browser. No logins, no bank
+                connections—just a sandbox to run the numbers quietly.
               </p>
-              <ul className="text-xs text-slate-600 list-disc list-inside space-y-1">
-                <li>No account required.</li>
-                <li>No credit pulls, no bank connections.</li>
-                <li>You&apos;re just running numbers quietly for yourself.</li>
-              </ul>
             </div>
-          </div>
-        )}
+          </aside>
 
-        {/* Tab navigation */}
-        <div className="bg-white border-b border-slate-200">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="flex gap-2 overflow-x-auto py-3">
-              <TabButton
-                icon={DollarSign}
-                label="Budget"
-                active={activeTab === 'budget'}
-                onClick={() => setActiveTab('budget')}
-              />
-              <TabButton
-                icon={Car}
-                label="Auto loan"
-                active={activeTab === 'auto'}
-                onClick={() => setActiveTab('auto')}
-              />
-              <TabButton
-                icon={Home}
-                label="Mortgage"
-                active={activeTab === 'mortgage'}
-                onClick={() => setActiveTab('mortgage')}
-              />
-              <TabButton
-                icon={Shield}
-                label="Debt payoff"
-                active={activeTab === 'debt'}
-                onClick={() => setActiveTab('debt')}
-              />
-              <TabButton
-                icon={PiggyBankIcon}
-                label="Savings"
-                active={activeTab === 'savings'}
-                onClick={() => setActiveTab('savings')}
-              />
-              <TabButton
-                icon={Activity}
-                label="Health score"
-                active={activeTab === 'health'}
-                onClick={() => setActiveTab('health')}
-              />
-              <TabButton
-                icon={TrendingUp}
-                label="Real estate ROI"
-                active={activeTab === 'roi'}
-                onClick={() => setActiveTab('roi')}
-              />
-            </div>
+          {/* Main content area */}
+          <div className="bg-slate-50/80 md:bg-slate-50 px-4 sm:px-7 py-6 md:py-7">
+            {activeTab === 'budget' && <BudgetTab />}
+            {activeTab === 'auto' && <AutoLoanTab />}
+            {activeTab === 'mortgage' && <MortgageTab />}
+            {activeTab === 'debt' && <DebtPayoffTab />}
+            {activeTab === 'savings' && <SavingsTab />}
+            {activeTab === 'roi' && <RealEstateRoiCalculator />}
           </div>
         </div>
-
-               {/* Main content */}
-        <main className="max-w-7xl mx-auto px-6 py-8">
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,2.2fr)_minmax(260px,1fr)] items-start">
-            {/* Left: active calculator */}
-            <div className="space-y-8">
-              {activeTab === 'budget' && <BudgetTab />}
-              {activeTab === 'auto' && <AutoLoanTab />}
-              {activeTab === 'mortgage' && <MortgageTab />}
-              {activeTab === 'debt' && <DebtPayoffTab />}
-              {activeTab === 'savings' && <SavingsTab />}
-              {activeTab === 'roi' && <RealEstateRoiCalculator />}
-            </div>
-
-            {/* Right: contextual tips + overview */}
-            <SidePanel activeTab={activeTab} />
-          </div>
-        </main>
       </div>
+
+      {/* Privacy modal */}
+      {showPrivacy && (
+        <div className="fixed inset-0 bg-slate-900/50 flex items-center justify-center z-50">
+          <div className="bg-white max-w-lg w-full mx-4 rounded-2xl shadow-xl p-5 relative">
+            <button
+              className="absolute top-3 right-3 text-slate-400 hover:text-slate-600"
+              onClick={() => setShowPrivacy(false)}
+            >
+              <X size={18} />
+            </button>
+            <h2 className="text-lg font-semibold text-slate-900 mb-2">
+              Privacy first
+            </h2>
+            <p className="text-sm text-slate-700 mb-3">
+              Nothing you type here is sent to a server for calculations.
+              The math runs in your browser. When you close the tab, your
+              numbers are gone.
+            </p>
+            <ul className="text-xs text-slate-600 list-disc list-inside space-y-1">
+              <li>No account required.</li>
+              <li>No credit pulls, no bank or brokerage connections.</li>
+              <li>You&apos;re just running scenarios quietly for yourself.</li>
+            </ul>
+          </div>
+        </div>
+      )}
     </div>
   );
-}
+};
 
 /* Small icon wrapper for savings tab label */
 function PiggyBankIcon(props) {
   return <Calculator {...props} />;
 }
 
-/* Tab button component */
+/* Sidebar nav button component */
 function TabButton({ icon: Icon, label, active, onClick }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${
+      className={`w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
         active
-          ? 'bg-gradient-to-r from-blue-600 to-teal-600 text-white shadow-md scale-[1.02]'
-          : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+          ? 'bg-white text-slate-900 shadow-sm'
+          : 'text-slate-200 hover:bg-slate-800/70 hover:text-white'
       }`}
     >
-      <Icon size={18} />
-      <span>{label}</span>
+      <div className="flex items-center gap-2">
+        <span
+          className={`h-6 w-1 rounded-full ${
+            active ? 'bg-teal-500' : 'bg-slate-700'
+          }`}
+        />
+        <Icon size={16} />
+        <span>{label}</span>
+      </div>
+      {active && <ArrowUpRight size={14} className="text-teal-500" />}
     </button>
   );
 }
