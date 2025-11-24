@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Calculator,
   Home,
@@ -11,9 +11,6 @@ import {
   BarChart3,
   PieChart,
   Clock,
-  ArrowUpRight,
-  ArrowDownRight,
-  Activity,
 } from 'lucide-react';
 import {
   LineChart,
@@ -106,6 +103,7 @@ function TermTooltipLabel({ term, label }) {
 
 /* =======================================================
    REAL ESTATE ROI / CAP RATE / CASH-ON-CASH CALCULATOR
+   with simple 1 / 3 / 5 / 10-year cash-flow view
    ======================================================= */
 
 const roiFormatCurrency = (n) =>
@@ -128,9 +126,6 @@ function RealEstateRoiCalculator() {
   const [interestRate, setInterestRate] = useState('6.5');
   const [loanTermYears, setLoanTermYears] = useState('30');
 
-  // For the multi-year view
-  const horizons = [1, 3, 5, 10];
-
   const P = parseNumber(purchasePrice);
   const CC = parseNumber(closingCosts);
   const rehab = parseNumber(rehabCosts);
@@ -145,6 +140,7 @@ function RealEstateRoiCalculator() {
   const years = parseNumber(loanTermYears);
 
   let results = null;
+  let horizons = [];
 
   if (P > 0 && years > 0) {
     const loanAmount = P * (1 - dpPct);
@@ -158,9 +154,9 @@ function RealEstateRoiCalculator() {
 
     const annualDebtService = monthlyDebtService * 12;
 
-    const gsi = (rent + other) * 12; // gross scheduled income
+    const gsi = (rent + other) * 12;
     const vacancyLoss = gsi * vacPct;
-    const egi = gsi - vacancyLoss; // effective gross income
+    const egi = gsi - vacancyLoss;
 
     const opEx = egi * opPct;
     const noi = egi - opEx;
@@ -173,18 +169,6 @@ function RealEstateRoiCalculator() {
       totalCashInvested > 0 ? annualCashFlow / totalCashInvested : 0;
 
     const dscr = annualDebtService > 0 ? noi / annualDebtService : 0;
-
-    // simple multi-year projections assuming cash flow stays constant
-    const multiYear = horizons.map((h) => {
-      const cumulativeCash = annualCashFlow * h;
-      const simpleRoi =
-        totalCashInvested > 0 ? cumulativeCash / totalCashInvested : 0;
-      return {
-        years: h,
-        cumulativeCash,
-        simpleRoi,
-      };
-    });
 
     results = {
       loanAmount,
@@ -201,18 +185,31 @@ function RealEstateRoiCalculator() {
       annualCashFlow,
       cashOnCash,
       dscr,
-      multiYear,
     };
+
+    const horizonYears = [1, 3, 5, 10];
+    horizons = horizonYears.map((yrs) => {
+      const cumulativeCashFlow = annualCashFlow * yrs;
+      const simpleROI =
+        totalCashInvested > 0 ? cumulativeCashFlow / totalCashInvested : 0;
+      return {
+        label: `${yrs} year${yrs === 1 ? '' : 's'}`,
+        years: yrs,
+        cumulativeCashFlow,
+        simpleROI,
+      };
+    });
   }
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-slate-900">Real Estate ROI</h2>
+      <h2 className="text-2xl font-bold text-slate-900">
+        Real Estate ROI
+      </h2>
       <p className="text-sm text-slate-600 max-w-2xl">
         Estimate cap rate, cash-on-cash return, and DSCR to understand if a
-        rental or commercial property is worth the risk. The multi-year view
-        assumes Year-1 cash flow stays the same so you can compare 1, 3, 5 and
-        10-year simple ROI.
+        rental or commercial property is worth the risk. Then see simple
+        1 / 3 / 5 / 10-year cash-flow projections using your assumptions.
       </p>
 
       <div className="grid gap-6 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
@@ -220,7 +217,7 @@ function RealEstateRoiCalculator() {
         <div className="space-y-6">
           <div className="rounded-2xl bg-white p-5 shadow border border-slate-100">
             <h3 className="text-lg font-semibold text-slate-900 mb-3">
-              Property &amp; one-time costs
+              Property &amp; One-Time Costs
             </h3>
             <div className="grid gap-4 md:grid-cols-3">
               <RoiField
@@ -246,7 +243,7 @@ function RealEstateRoiCalculator() {
 
           <div className="rounded-2xl bg-white p-5 shadow border border-slate-100">
             <h3 className="text-lg font-semibold text-slate-900 mb-3">
-              Income &amp; vacancy
+              Income &amp; Vacancy
             </h3>
             <div className="grid gap-4 md:grid-cols-3">
               <RoiField
@@ -272,7 +269,7 @@ function RealEstateRoiCalculator() {
 
           <div className="rounded-2xl bg-white p-5 shadow border border-slate-100">
             <h3 className="text-lg font-semibold text-slate-900 mb-3">
-              Operating expenses &amp; financing
+              Operating Expenses &amp; Financing
             </h3>
             <div className="grid gap-4 md:grid-cols-4">
               <RoiField
@@ -306,22 +303,23 @@ function RealEstateRoiCalculator() {
         <div className="space-y-6">
           <div className="rounded-2xl bg-white p-5 shadow border border-slate-100">
             <h3 className="text-lg font-semibold text-slate-900 mb-3">
-              Key metrics (Year 1)
+              Key Metrics (Year 1)
             </h3>
 
             {!results ? (
               <p className="text-sm text-slate-500">
-                Enter property values to see cap rate, cash-on-cash, and DSCR.
+                Enter property values to see cap rate, cash-on-cash, DSCR, and
+                multi-year cash-flow.
               </p>
             ) : (
               <>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <RoiMetricTile
-                    label="Cap rate"
+                    label="Cap Rate"
                     value={roiFormatPercent(results.capRate)}
                   />
                   <RoiMetricTile
-                    label="Cash-on-cash"
+                    label="Cash-on-Cash (Year 1)"
                     value={roiFormatPercent(results.cashOnCash)}
                   />
                   <RoiMetricTile
@@ -336,7 +334,7 @@ function RealEstateRoiCalculator() {
                     }
                   />
                   <RoiMetricTile
-                    label="Annual cash flow"
+                    label="Annual Cash Flow"
                     value={roiFormatCurrency(results.annualCashFlow)}
                     emphasize={
                       results.annualCashFlow < 0 ? 'bad' : 'good'
@@ -350,94 +348,85 @@ function RealEstateRoiCalculator() {
                   <RoiRow label="NOI" value={roiFormatCurrency(results.noi)} />
                   <RoiRow
                     label="Annual debt service"
-                    value={roiFormatCurrency(results.annualDebtService)}
+                    value={roiFormatCurrency(
+                      results.annualDebtService
+                    )}
                   />
                   <RoiRow
                     label="Total cash invested"
-                    value={roiFormatCurrency(results.totalCashInvested)}
+                    value={roiFormatCurrency(
+                      results.totalCashInvested
+                    )}
                   />
                   <RoiRow
                     label="Loan amount"
                     value={roiFormatCurrency(results.loanAmount)}
                   />
                 </dl>
+
+                {horizons.length > 0 && (
+                  <>
+                    <hr className="my-4" />
+                    <h4 className="text-sm font-semibold text-slate-900 mb-1">
+                      Simple horizon view (cash flow only)
+                    </h4>
+                    <p className="text-[11px] text-slate-500 mb-2">
+                      This assumes Year-1 cash flow stays the same, ignores
+                      appreciation and principal paydown. It&apos;s just a
+                      quick gut-check.
+                    </p>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      {horizons.map((h) => (
+                        <div
+                          key={h.years}
+                          className="border border-slate-200 rounded-lg px-3 py-2 bg-slate-50"
+                        >
+                          <div className="flex justify-between mb-1">
+                            <span className="font-semibold">
+                              {h.label}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Cash flow</span>
+                            <span className="font-mono">
+                              {roiFormatCurrency(h.cumulativeCashFlow)}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Cash-on-cash (cum.)</span>
+                            <span className="font-mono">
+                              {roiFormatPercent(h.simpleROI)}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
               </>
             )}
           </div>
-
-          {/* Multi-year simple ROI view */}
-          {results && (
-            <div className="rounded-2xl bg-white p-5 shadow border border-slate-100">
-              <h3 className="text-sm font-semibold text-slate-900 mb-2 flex items-center gap-2">
-                <TrendingUp size={14} />
-                Multi-year view (assuming Year-1 cash flow stays flat)
-              </h3>
-              <div className="grid sm:grid-cols-4 gap-3 text-xs">
-                {results.multiYear.map((row) => {
-                  const positive = row.cumulativeCash >= 0;
-                  return (
-                    <div
-                      key={row.years}
-                      className={`rounded-xl border px-3 py-2.5 flex flex-col gap-1 ${
-                        positive
-                          ? 'border-emerald-200 bg-emerald-50'
-                          : 'border-rose-200 bg-rose-50'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="font-semibold">
-                          {row.years} yrs
-                        </span>
-                        {positive ? (
-                          <ArrowUpRight size={14} className="text-emerald-600" />
-                        ) : (
-                          <ArrowDownRight size={14} className="text-rose-600" />
-                        )}
-                      </div>
-                      <div className="text-[11px]">
-                        Cash flow:{' '}
-                        <span className="font-mono">
-                          {roiFormatCurrency(row.cumulativeCash)}
-                        </span>
-                      </div>
-                      <div className="text-[11px]">
-                        Simple ROI on cash:{' '}
-                        <span className="font-mono">
-                          {roiFormatPercent(row.simpleRoi)}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-              <p className="mt-2 text-[11px] text-slate-500">
-                This ignores rent growth, expense inflation, and principal
-                paydown. It&apos;s a quick way to see how much cash you might
-                get back over different time horizons with today&apos;s numbers.
-              </p>
-            </div>
-          )}
 
           <div className="rounded-2xl bg-slate-900 p-4 text-sm text-slate-100">
             <p className="font-semibold mb-2">How to read this:</p>
             <ul className="space-y-1 list-disc list-inside">
               <li>
-                <span className="font-semibold">Cap rate</span> is the
+                <span className="font-semibold">Cap Rate</span> is the
                 property&apos;s return if you paid all cash.
               </li>
               <li>
-                <span className="font-semibold">Cash-on-cash</span> shows
-                return on your actual cash invested (down payment + closing +
-                rehab).
+                <span className="font-semibold">Cash-on-Cash</span> shows
+                return on your actual cash invested (down payment +
+                closing + rehab).
               </li>
               <li>
-                <span className="font-semibold">DSCR</span> compares NOI to
-                loan payments. Many lenders like DSCR ≥ 1.20.
+                <span className="font-semibold">DSCR</span> compares NOI
+                to loan payments. Many lenders like DSCR ≥ 1.20.
               </li>
               <li>
-                <span className="font-semibold">Annual cash flow</span> is what
-                remains after expenses and loan payments, before taxes and
-                reserves.
+                The horizon boxes multiply Year-1 cash flow by 1 / 3 / 5 / 10
+                years so you can sanity-check the commitment before moving
+                forward.
               </li>
             </ul>
           </div>
@@ -494,7 +483,9 @@ function RoiRow({ label, value }) {
       <dd className="font-mono">{value}</dd>
     </div>
   );
-}/* ---------- Mortgage: state + territory data ---------- */
+}
+
+/* ---------- Mortgage: state + territory data ---------- */
 const stateData = {
   AL: { name: 'Alabama', propertyTax: 0.41, insurance: 1800 },
   AK: { name: 'Alaska', propertyTax: 1.19, insurance: 1200 },
@@ -608,23 +599,10 @@ function BudgetTab() {
   const wantsPct = pct(totalWants);
   const savingsPct = pct(totalSavings);
 
-  const idealNeeds = totalIncome * 0.5;
-  const idealWants = totalIncome * 0.3;
-  const idealSavings = totalIncome * 0.2;
-
   const chartData = [
-    {
-      name: 'Needs',
-      value: Math.round(needsPct),
-    },
-    {
-      name: 'Wants',
-      value: Math.round(wantsPct),
-    },
-    {
-      name: 'Savings',
-      value: Math.round(savingsPct),
-    },
+    { name: 'Needs', value: Math.round(needsPct) },
+    { name: 'Wants', value: Math.round(wantsPct) },
+    { name: 'Savings', value: Math.round(savingsPct) },
   ];
 
   return (
@@ -793,7 +771,7 @@ function BudgetTab() {
   );
 }
 
-/* ---------- Tiny bar-chart-like component using Recharts AreaChart ---------- */
+/* tiny bar-chart-like component using AreaChart */
 function BarChartLike({ data }) {
   const transformed = data.map((d) => ({
     name: d.name,
@@ -1020,9 +998,7 @@ function MortgageTab() {
   const [netMonthly, setNetMonthly] = useState('');
 
   const homePrice = parseNumber(price);
-  const downPayment = down
-    ? parseNumber(down)
-    : homePrice * 0.2;
+  const downPayment = down ? parseNumber(down) : homePrice * 0.2;
 
   const loanAmount = Math.max(0, homePrice - downPayment);
   const annualRate = parseNumber(rate) / 100;
@@ -1050,7 +1026,8 @@ function MortgageTab() {
     monthlyPMI = (loanAmount * 0.0085) / 12;
   }
 
-  const totalMonthly = monthlyPI + monthlyTax + monthlyInsurance + monthlyPMI;
+  const totalMonthly =
+    monthlyPI + monthlyTax + monthlyInsurance + monthlyPMI;
   const pctGross =
     parseNumber(grossMonthly) > 0
       ? (totalMonthly / parseNumber(grossMonthly)) * 100
@@ -1620,7 +1597,10 @@ function SavingsTab() {
             <div className="h-48">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={data}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    vertical={false}
+                  />
                   <XAxis
                     dataKey="year"
                     tick={{ fontSize: 10 }}
@@ -1668,439 +1648,7 @@ function SavingsTab() {
   );
 }
 
-/* ---------- Financial Health Score tab (300–850) ---------- */
-function FinancialHealthTab() {
-  const [netIncome, setNetIncome] = useState('');
-  const [essentials, setEssentials] = useState('');
-  const [debtPayments, setDebtPayments] = useState('');
-  const [monthlySaving, setMonthlySaving] = useState('');
-  const [emergencyFund, setEmergencyFund] = useState('');
-  const [creditUtil, setCreditUtil] = useState('');
-
-  const net = parseNumber(netIncome);
-  const essentialsVal = parseNumber(essentials);
-  const debtVal = parseNumber(debtPayments);
-  const savingVal = parseNumber(monthlySaving);
-  const efMonths = parseNumber(emergencyFund);
-  const utilPct = parseNumber(creditUtil);
-
-  const ratio = (num) => (net > 0 ? num / net : 0);
-
-  const essentialsRatio = ratio(essentialsVal);
-  const debtRatio = ratio(debtVal);
-  const savingsRatio = ratio(savingVal);
-
-  // Normalize each factor to 0–1
-  const clamp01 = (x) => Math.max(0, Math.min(1, x));
-
-  // 1) Essentials as % of net (lower is better, sweet spot <= 0.5)
-  let essentialsScore = 0;
-  if (essentialsRatio <= 0.5) {
-    essentialsScore = 1;
-  } else if (essentialsRatio <= 0.7) {
-    // Linearly down from 1 to 0.4 between 50–70%
-    essentialsScore =
-      1 - ((essentialsRatio - 0.5) / 0.2) * (1 - 0.4);
-  } else if (essentialsRatio <= 0.9) {
-    // 70–90% → 0.4 down to 0.1
-    essentialsScore =
-      0.4 - ((essentialsRatio - 0.7) / 0.2) * (0.3);
-  } else {
-    essentialsScore = 0.05;
-  }
-  essentialsScore = clamp01(essentialsScore);
-
-  // 2) Debt payments as % of net (lower is better, <=10% great, >40% rough)
-  let debtScore = 0;
-  if (debtRatio <= 0.1) {
-    debtScore = 1;
-  } else if (debtRatio <= 0.25) {
-    debtScore = 1 - ((debtRatio - 0.1) / 0.15) * 0.4; // to 0.6
-  } else if (debtRatio <= 0.4) {
-    debtScore = 0.6 - ((debtRatio - 0.25) / 0.15) * 0.4; // to 0.2
-  } else {
-    debtScore = 0.05;
-  }
-  debtScore = clamp01(debtScore);
-
-  // 3) Savings rate as % of net (higher is better, >=20% great)
-  let saveScore = 0;
-  if (savingsRatio >= 0.2) {
-    saveScore = 1;
-  } else if (savingsRatio >= 0.1) {
-    // 10–20% → 0.6–1
-    saveScore = 0.6 + ((savingsRatio - 0.1) / 0.1) * 0.4;
-  } else if (savingsRatio >= 0.02) {
-    // 2–10% → 0.2–0.6
-    saveScore = 0.2 + ((savingsRatio - 0.02) / 0.08) * 0.4;
-  } else {
-    saveScore = 0.05;
-  }
-  saveScore = clamp01(saveScore);
-
-  // 4) Emergency fund in months of expenses (>=3 good, >=6 excellent)
-  let efScore = 0;
-  if (efMonths >= 6) {
-    efScore = 1;
-  } else if (efMonths >= 3) {
-    efScore = 0.7 + ((efMonths - 3) / 3) * 0.3; // 0.7–1
-  } else if (efMonths >= 1) {
-    efScore = 0.3 + ((efMonths - 1) / 2) * 0.4; // 0.3–0.7
-  } else if (efMonths > 0) {
-    efScore = 0.15;
-  } else {
-    efScore = 0.05;
-  }
-  efScore = clamp01(efScore);
-
-  // 5) Credit utilization (lower is better, <=30% great)
-  let utilScore = 0;
-  if (utilPct <= 10) {
-    utilScore = 1;
-  } else if (utilPct <= 30) {
-    utilScore = 1 - ((utilPct - 10) / 20) * 0.2; // 0.8–1
-  } else if (utilPct <= 60) {
-    utilScore = 0.4 + ((60 - utilPct) / 30) * 0.3; // 0.4–0.7
-  } else if (utilPct <= 90) {
-    utilScore = 0.15 + ((90 - utilPct) / 30) * 0.25; // 0.15–0.4
-  } else {
-    utilScore = 0.05;
-  }
-  utilScore = clamp01(utilScore);
-
-  // Weighted blend to one normalized score
-  const hasInputs =
-    net > 0 &&
-    (essentialsVal > 0 ||
-      debtVal > 0 ||
-      savingVal > 0 ||
-      efMonths > 0 ||
-      utilPct > 0);
-
-  const normalized =
-    hasInputs
-      ? clamp01(
-          essentialsScore * 0.25 +
-            debtScore * 0.2 +
-            saveScore * 0.2 +
-            efScore * 0.2 +
-            utilScore * 0.15
-        )
-      : 0;
-
-  // Map 0–1 to 300–850 range
-  const score = hasInputs
-    ? Math.round(300 + normalized * 550)
-    : null;
-
-  let label = '—';
-  let labelColor = 'text-slate-700';
-  let chipColor = 'bg-slate-100 text-slate-700';
-
-  if (score !== null) {
-    if (score < 500) {
-      label = 'Needs attention';
-      labelColor = 'text-rose-600';
-      chipColor = 'bg-rose-50 text-rose-700';
-    } else if (score < 650) {
-      label = 'Rebuilding';
-      labelColor = 'text-amber-600';
-      chipColor = 'bg-amber-50 text-amber-700';
-    } else if (score < 740) {
-      label = 'Strong';
-      labelColor = 'text-emerald-600';
-      chipColor = 'bg-emerald-50 text-emerald-700';
-    } else {
-      label = 'Excellent';
-      labelColor = 'text-emerald-700';
-      chipColor = 'bg-emerald-100 text-emerald-800';
-    }
-  }
-
-  return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-slate-900">
-        Financial Health Score
-      </h2>
-      <p className="text-sm text-slate-600 max-w-2xl">
-        A quick, credit-style snapshot (300–850) based on your cash flow,
-        savings habits, debt load, and emergency cushion. Use rough numbers.
-        This is not a credit score and not shared with anyone.
-      </p>
-
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
-        {/* Inputs */}
-        <div className="space-y-4">
-          <div className="bg-white rounded-2xl border border-slate-200 p-4 space-y-3">
-            <h3 className="text-sm font-semibold text-slate-900">
-              Monthly picture
-            </h3>
-            <div className="grid md:grid-cols-2 gap-3">
-              <label className="text-sm text-slate-700">
-                Monthly take-home pay (net)
-                <input
-                  type="number"
-                  className="mt-1 w-full px-3 py-2 border border-slate-300 rounded-lg"
-                  value={netIncome}
-                  onChange={(e) => setNetIncome(e.target.value)}
-                  placeholder="What hits your bank after taxes"
-                />
-              </label>
-              <label className="text-sm text-slate-700">
-                Essentials each month
-                <input
-                  type="number"
-                  className="mt-1 w-full px-3 py-2 border border-slate-300 rounded-lg"
-                  value={essentials}
-                  onChange={(e) => setEssentials(e.target.value)}
-                  placeholder="Rent, food, utilities, basics"
-                />
-              </label>
-            </div>
-            <div className="grid md:grid-cols-2 gap-3">
-              <label className="text-sm text-slate-700">
-                Min. debt payments each month
-                <input
-                  type="number"
-                  className="mt-1 w-full px-3 py-2 border border-slate-300 rounded-lg"
-                  value={debtPayments}
-                  onChange={(e) => setDebtPayments(e.target.value)}
-                  placeholder="Cards, loans, car, etc."
-                />
-              </label>
-              <label className="text-sm text-slate-700">
-                Amount you save / invest each month
-                <input
-                  type="number"
-                  className="mt-1 w-full px-3 py-2 border border-slate-300 rounded-lg"
-                  value={monthlySaving}
-                  onChange={(e) => setMonthlySaving(e.target.value)}
-                  placeholder="401(k), IRA, brokerage, cash"
-                />
-              </label>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl border border-slate-200 p-4 space-y-3">
-            <h3 className="text-sm font-semibold text-slate-900">
-              Safety net &amp; credit habits
-            </h3>
-            <div className="grid md:grid-cols-2 gap-3">
-              <label className="text-sm text-slate-700">
-                Emergency fund (months of expenses)
-                <input
-                  type="number"
-                  className="mt-1 w-full px-3 py-2 border border-slate-300 rounded-lg"
-                  value={emergencyFund}
-                  onChange={(e) => setEmergencyFund(e.target.value)}
-                  placeholder="e.g. 0, 1, 3, 6"
-                />
-              </label>
-              <label className="text-sm text-slate-700">
-                Credit utilization (% of limits used)
-                <input
-                  type="number"
-                  className="mt-1 w-full px-3 py-2 border border-slate-300 rounded-lg"
-                  value={creditUtil}
-                  onChange={(e) => setCreditUtil(e.target.value)}
-                  placeholder="Best guess is fine"
-                />
-              </label>
-            </div>
-            <p className="text-[11px] text-slate-500">
-              If you already used the other tabs, you can reuse numbers:
-              budget for &quot;essentials&quot; and savings, debt payoff for
-              minimums, etc.
-            </p>
-          </div>
-        </div>
-
-        {/* Score + insights */}
-        <div className="space-y-4">
-          <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-slate-100 rounded-2xl p-5">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-xs uppercase tracking-wide text-slate-400 mb-1">
-                  MoneyMap health score
-                </p>
-                <div className="flex items-baseline gap-3">
-                  <span className="text-4xl font-semibold font-mono">
-                    {score ?? '—'}
-                  </span>
-                  <span className={`text-sm font-medium ${labelColor}`}>
-                    {label}
-                  </span>
-                </div>
-                <p className="mt-2 text-xs text-slate-300 max-w-xs">
-                  300–850 scale inspired by credit scores, but based only on
-                  the numbers you enter here. No banks, no bureaus, no hard
-                  pulls.
-                </p>
-              </div>
-              <div
-                className={`px-3 py-1 rounded-full text-[11px] font-medium flex items-center gap-1 ${chipColor}`}
-              >
-                <Activity size={12} />
-                {score ? 'Snapshot today' : 'Enter numbers to see score'}
-              </div>
-            </div>
-
-            {score && (
-              <div className="mt-4 grid grid-cols-3 gap-3 text-[11px]">
-                <ScorePill
-                  label="Essentials load"
-                  value={
-                    essentialsRatio > 0
-                      ? formatPercent(essentialsRatio, 0)
-                      : '—'
-                  }
-                  good={essentialsRatio <= 0.5}
-                />
-                <ScorePill
-                  label="Debt load"
-                  value={
-                    debtRatio > 0
-                      ? formatPercent(debtRatio, 0)
-                      : '—'
-                  }
-                  good={debtRatio <= 0.15}
-                />
-                <ScorePill
-                  label="Savings rate"
-                  value={
-                    savingsRatio > 0
-                      ? formatPercent(savingsRatio, 0)
-                      : '—'
-                  }
-                  good={savingsRatio >= 0.2}
-                />
-                <ScorePill
-                  label="Emergency fund"
-                  value={efMonths ? `${efMonths.toFixed(1)} mo` : '—'}
-                  good={efMonths >= 3}
-                />
-                <ScorePill
-                  label="Credit utilization"
-                  value={utilPct ? `${utilPct.toFixed(0)}%` : '—'}
-                  good={utilPct <= 30}
-                />
-              </div>
-            )}
-          </div>
-
-          <div className="bg-white rounded-2xl border border-slate-200 p-4 text-xs text-slate-700 space-y-2">
-            <p className="font-semibold flex items-center gap-2 text-slate-900">
-              <Info size={14} /> How to use this score
-            </p>
-            <ul className="list-disc list-inside space-y-1">
-              <li>
-                Treat it as a dashboard, not a judgment. The goal is to move
-                one metric at a time in the right direction.
-              </li>
-              <li>
-                Focus first on <span className="font-semibold">
-                  essentials
-                </span>{' '}
-                + <span className="font-semibold">debt load</span>. Getting
-                those under control makes everything else easier.
-              </li>
-              <li>
-                A big jump usually comes from building a small emergency fund
-                and raising your savings rate a few percentage points.
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ScorePill({ label, value, good }) {
-  return (
-    <div className="flex items-center justify-between rounded-lg bg-slate-900/40 px-2 py-1.5">
-      <span className="text-slate-300">{label}</span>
-      <span
-        className={`flex items-center gap-1 font-mono ${
-          good ? 'text-emerald-300' : 'text-amber-300'
-        }`}
-      >
-        {value}
-        {good ? (
-          <ArrowUpRight size={10} />
-        ) : (
-          <ArrowDownRight size={10} />
-        )}
-      </span>
-    </div>
-  );
-}
-
 /* ---------- Main app ---------- */
-const MoneyMapLogo = ({ size = 32 }) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 32 32"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <defs>
-      <linearGradient
-        id="mmGradient"
-        x1="4"
-        y1="28"
-        x2="28"
-        y2="4"
-        gradientUnits="userSpaceOnUse"
-      >
-        <stop stopColor="#0A6375" />
-        <stop offset="0.5" stopColor="#0C3C75" />
-        <stop offset="1" stopColor="#19A39D" />
-      </linearGradient>
-    </defs>
-
-    {/* Rounded square background stroke */}
-    <rect
-      x="3"
-      y="3"
-      width="26"
-      height="26"
-      rx="8"
-      stroke="#0A1A2F"
-      strokeWidth="1.4"
-      fill="none"
-    />
-
-    {/* Lower momentum arc (path / journey) */}
-    <path
-      d="M6 22C9.2 19 11.5 17.5 13.8 16.6C16.1 15.8 18.2 15.8 20.2 16.3C22.2 16.8 24 17.8 26 19.5"
-      stroke="url(#mmGradient)"
-      strokeWidth="2.1"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-
-    {/* Upper momentum arc (growth / analytics) */}
-    <path
-      d="M8 18.5C10.3 16 12.4 14.7 14.4 14.0C16.4 13.3 18.3 13.2 20.1 13.6C21.9 14.0 23.5 14.9 25 16.3"
-      stroke="url(#mmGradient)"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-
-    {/* End-point node (target / goal) */}
-    <circle
-      cx="25.2"
-      cy="16.3"
-      r="1.4"
-      fill="#19A39D"
-    />
-  </svg>
-);
-
-/* ---------- Main app with premium sidebar layout ---------- */
 
 const MoneyMapLogo = ({ size = 32 }) => (
   <svg
@@ -2124,8 +1672,6 @@ const MoneyMapLogo = ({ size = 32 }) => (
         <stop offset="1" stopColor="#19A39D" />
       </linearGradient>
     </defs>
-
-    {/* Rounded square background stroke */}
     <rect
       x="3"
       y="3"
@@ -2136,8 +1682,6 @@ const MoneyMapLogo = ({ size = 32 }) => (
       strokeWidth="1.4"
       fill="none"
     />
-
-    {/* Lower momentum arc (path / journey) */}
     <path
       d="M6 22C9.2 19 11.5 17.5 13.8 16.6C16.1 15.8 18.2 15.8 20.2 16.3C22.2 16.8 24 17.8 26 19.5"
       stroke="url(#mmGradient)"
@@ -2145,8 +1689,6 @@ const MoneyMapLogo = ({ size = 32 }) => (
       strokeLinecap="round"
       strokeLinejoin="round"
     />
-
-    {/* Upper momentum arc (growth / analytics) */}
     <path
       d="M8 18.5C10.3 16 12.4 14.7 14.4 14.0C16.4 13.3 18.3 13.2 20.1 13.6C21.9 14.0 23.5 14.9 25 16.3"
       stroke="url(#mmGradient)"
@@ -2154,8 +1696,6 @@ const MoneyMapLogo = ({ size = 32 }) => (
       strokeLinecap="round"
       strokeLinejoin="round"
     />
-
-    {/* End-point node (target / goal) */}
     <circle cx="25.2" cy="16.3" r="1.4" fill="#19A39D" />
   </svg>
 );
@@ -2165,194 +1705,144 @@ const FinancialCalculatorApp = () => {
   const [showPrivacy, setShowPrivacy] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 py-6 px-3 sm:px-6">
-      <div className="max-w-6xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-[260px,minmax(0,1fr)] rounded-3xl bg-white/90 backdrop-blur border border-slate-100 shadow-[0_24px_70px_rgba(15,23,42,0.45)] overflow-hidden">
-          {/* Sidebar */}
-          <aside className="bg-slate-900 text-slate-100 p-5 md:p-6 flex flex-col gap-6">
-            {/* Brand */}
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-2xl bg-slate-950/60 border border-slate-700">
-                <MoneyMapLogo size={28} />
-              </div>
-              <div className="space-y-0.5">
-                <div className="flex items-center gap-2">
-                  <h1 className="text-lg font-semibold tracking-tight">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <header className="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-40">
+          <div className="max-w-7xl mx-auto px-6 py-4">
+            <div className="flex justify-between items-center">
+              {/* Brand */}
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-white border border-slate-200 shadow-sm">
+                  <MoneyMapLogo size={28} />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold bg-gradient-to-r from-[#0A6375] via-[#0C3C75] to-[#19A39D] bg-clip-text text-transparent">
                     MoneyMap
                   </h1>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] uppercase tracking-[0.15em] bg-slate-800 text-slate-300 border border-slate-700">
-                    Beta
-                  </span>
-                </div>
-                <p className="text-[11px] text-slate-400">
-                  Quiet calculators for real-life money decisions.
-                </p>
-              </div>
-            </div>
-
-            {/* Nav sections */}
-            <nav className="flex-1 space-y-6 mt-2">
-              {/* Personal tools */}
-              <div>
-                <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500 mb-2">
-                  Personal
-                </p>
-                <div className="space-y-1">
-                  <TabButton
-                    icon={DollarSign}
-                    label="Budget"
-                    active={activeTab === 'budget'}
-                    onClick={() => setActiveTab('budget')}
-                  />
-                  <TabButton
-                    icon={Car}
-                    label="Auto loan"
-                    active={activeTab === 'auto'}
-                    onClick={() => setActiveTab('auto')}
-                  />
-                  <TabButton
-                    icon={Home}
-                    label="Mortgage"
-                    active={activeTab === 'mortgage'}
-                    onClick={() => setActiveTab('mortgage')}
-                  />
-                  <TabButton
-                    icon={Shield}
-                    label="Debt payoff"
-                    active={activeTab === 'debt'}
-                    onClick={() => setActiveTab('debt')}
-                  />
-                  <TabButton
-                    icon={PiggyBankIcon}
-                    label="Savings & investing"
-                    active={activeTab === 'savings'}
-                    onClick={() => setActiveTab('savings')}
-                  />
+                  <p className="text-xs text-slate-600">
+                    Chart your financial future—quietly, on your own terms.
+                  </p>
                 </div>
               </div>
-
-              {/* Real estate / investing */}
-              <div>
-                <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500 mb-2">
-                  Real estate &amp; investing
-                </p>
-                <div className="space-y-1">
-                  <TabButton
-                    icon={TrendingUp}
-                    label="Real estate ROI"
-                    active={activeTab === 'roi'}
-                    onClick={() => setActiveTab('roi')}
-                  />
-                </div>
-              </div>
-
-              {/* Business – placeholder for future tools */}
-              <div>
-                <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500 mb-2">
-                  Business (coming soon)
-                </p>
+              {/* Privacy button */}
+              <div className="flex items-center gap-3">
                 <button
-                  type="button"
-                  disabled
-                  className="w-full px-3 py-2.5 rounded-xl border border-dashed border-slate-700/80 text-[11px] text-slate-500 flex items-center justify-between cursor-not-allowed"
+                  onClick={() => setShowPrivacy(true)}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-full text-xs font-medium hover:bg-emerald-100 border border-emerald-100"
                 >
-                  <span className="flex items-center gap-2">
-                    <BarChart3 size={14} className="opacity-60" />
-                    Cash flow runway
-                  </span>
-                  <span className="text-[10px] uppercase tracking-[0.16em]">
-                    Soon
-                  </span>
+                  <Shield size={14} />
+                  <span>How your data is handled</span>
                 </button>
               </div>
-            </nav>
-
-            {/* Privacy + footer copy */}
-            <div className="space-y-2 text-[11px] text-slate-500">
-              <button
-                type="button"
-                onClick={() => setShowPrivacy(true)}
-                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-emerald-500/40 bg-emerald-500/10 text-emerald-200 text-[11px] font-medium hover:bg-emerald-500/20 transition-colors"
-              >
-                <Shield size={12} />
-                <span>How your data is handled</span>
-              </button>
-              <p className="leading-snug">
-                All math runs in your browser. No logins, no bank
-                connections—just a sandbox to run the numbers quietly.
-              </p>
             </div>
-          </aside>
+          </div>
+        </header>
 
-          {/* Main content area */}
-          <div className="bg-slate-50/80 md:bg-slate-50 px-4 sm:px-7 py-6 md:py-7">
-            {activeTab === 'budget' && <BudgetTab />}
-            {activeTab === 'auto' && <AutoLoanTab />}
-            {activeTab === 'mortgage' && <MortgageTab />}
-            {activeTab === 'debt' && <DebtPayoffTab />}
-            {activeTab === 'savings' && <SavingsTab />}
-            {activeTab === 'roi' && <RealEstateRoiCalculator />}
+        {/* Privacy modal */}
+        {showPrivacy && (
+          <div className="fixed inset-0 bg-slate-900/40 flex items-center justify-center z-50">
+            <div className="bg-white max-w-lg w-full mx-4 rounded-2xl shadow-xl p-5 relative">
+              <button
+                className="absolute top-3 right-3 text-slate-400 hover:text-slate-600"
+                onClick={() => setShowPrivacy(false)}
+              >
+                <X size={18} />
+              </button>
+              <h2 className="text-lg font-semibold text-slate-900 mb-2">
+                Privacy first
+              </h2>
+              <p className="text-sm text-slate-700 mb-3">
+                Nothing you type here is sent to a server for calculations. The
+                math runs in your browser. You can close the tab and it&apos;s
+                gone.
+              </p>
+              <ul className="text-xs text-slate-600 list-disc list-inside space-y-1">
+                <li>No account required.</li>
+                <li>No credit pulls, no bank connections.</li>
+                <li>You&apos;re just running numbers quietly for yourself.</li>
+              </ul>
+            </div>
+          </div>
+        )}
+
+        {/* Tabs */}
+        <div className="bg-white border-b border-slate-200">
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="flex gap-2 overflow-x-auto py-3">
+              <TabButton
+                icon={DollarSign}
+                label="Budget"
+                active={activeTab === 'budget'}
+                onClick={() => setActiveTab('budget')}
+              />
+              <TabButton
+                icon={Car}
+                label="Auto loan"
+                active={activeTab === 'auto'}
+                onClick={() => setActiveTab('auto')}
+              />
+              <TabButton
+                icon={Home}
+                label="Mortgage"
+                active={activeTab === 'mortgage'}
+                onClick={() => setActiveTab('mortgage')}
+              />
+              <TabButton
+                icon={Shield}
+                label="Debt payoff"
+                active={activeTab === 'debt'}
+                onClick={() => setActiveTab('debt')}
+              />
+              <TabButton
+                icon={PiggyBankIcon}
+                label="Savings"
+                active={activeTab === 'savings'}
+                onClick={() => setActiveTab('savings')}
+              />
+              <TabButton
+                icon={TrendingUp}
+                label="Real estate ROI"
+                active={activeTab === 'roi'}
+                onClick={() => setActiveTab('roi')}
+              />
+            </div>
           </div>
         </div>
+
+        {/* Main content */}
+        <main className="max-w-7xl mx-auto px-6 py-8 space-y-8">
+          {activeTab === 'budget' && <BudgetTab />}
+          {activeTab === 'auto' && <AutoLoanTab />}
+          {activeTab === 'mortgage' && <MortgageTab />}
+          {activeTab === 'debt' && <DebtPayoffTab />}
+          {activeTab === 'savings' && <SavingsTab />}
+          {activeTab === 'roi' && <RealEstateRoiCalculator />}
+        </main>
       </div>
-
-      {/* Privacy modal */}
-      {showPrivacy && (
-        <div className="fixed inset-0 bg-slate-900/50 flex items-center justify-center z-50">
-          <div className="bg-white max-w-lg w-full mx-4 rounded-2xl shadow-xl p-5 relative">
-            <button
-              className="absolute top-3 right-3 text-slate-400 hover:text-slate-600"
-              onClick={() => setShowPrivacy(false)}
-            >
-              <X size={18} />
-            </button>
-            <h2 className="text-lg font-semibold text-slate-900 mb-2">
-              Privacy first
-            </h2>
-            <p className="text-sm text-slate-700 mb-3">
-              Nothing you type here is sent to a server for calculations.
-              The math runs in your browser. When you close the tab, your
-              numbers are gone.
-            </p>
-            <ul className="text-xs text-slate-600 list-disc list-inside space-y-1">
-              <li>No account required.</li>
-              <li>No credit pulls, no bank or brokerage connections.</li>
-              <li>You&apos;re just running scenarios quietly for yourself.</li>
-            </ul>
-          </div>
-        </div>
-      )}
     </div>
   );
-};
+}
 
-/* Small icon wrapper for savings tab label */
+/* Small icon wrapper for savings tab */
 function PiggyBankIcon(props) {
   return <Calculator {...props} />;
 }
 
-/* Sidebar nav button component */
+/* Tab button component */
 function TabButton({ icon: Icon, label, active, onClick }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+      className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${
         active
-          ? 'bg-white text-slate-900 shadow-sm'
-          : 'text-slate-200 hover:bg-slate-800/70 hover:text-white'
+          ? 'bg-gradient-to-r from-blue-600 to-teal-600 text-white shadow-md scale-[1.02]'
+          : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
       }`}
     >
-      <div className="flex items-center gap-2">
-        <span
-          className={`h-6 w-1 rounded-full ${
-            active ? 'bg-teal-500' : 'bg-slate-700'
-          }`}
-        />
-        <Icon size={16} />
-        <span>{label}</span>
-      </div>
-      {active && <ArrowUpRight size={14} className="text-teal-500" />}
+      <Icon size={18} />
+      <span>{label}</span>
     </button>
   );
 }
