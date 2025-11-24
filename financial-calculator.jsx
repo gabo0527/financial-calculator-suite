@@ -128,6 +128,10 @@ function RealEstateRoiCalculator() {
   const [interestRate, setInterestRate] = useState('6.5');
   const [loanTermYears, setLoanTermYears] = useState('30');
 
+  // NEW: simple growth assumptions for projections
+  const [incomeGrowthRate, setIncomeGrowthRate] = useState('2'); // % per year
+  const [valueGrowthRate, setValueGrowthRate] = useState('3');   // % per year
+
   const P = parseNumber(purchasePrice);
   const CC = parseNumber(closingCosts);
   const rehab = parseNumber(rehabCosts);
@@ -141,7 +145,11 @@ function RealEstateRoiCalculator() {
   const rate = parseNumber(interestRate) / 100;
   const years = parseNumber(loanTermYears);
 
+  const incGrowth = parseNumber(incomeGrowthRate) / 100; // NOI growth
+  const valGrowth = parseNumber(valueGrowthRate) / 100;  // property value growth
+
   let results = null;
+  let projections = [];
 
   if (P > 0 && years > 0) {
     const loanAmount = P * (1 - dpPct);
@@ -187,6 +195,31 @@ function RealEstateRoiCalculator() {
       cashOnCash,
       dscr,
     };
+
+    // ---- Multi-year rough projections (3 / 5 / 10 years) ----
+    const horizons = [3, 5, 10];
+
+    projections = horizons.map((h) => {
+      let totalCashFlow = 0;
+
+      for (let year = 1; year <= h; year++) {
+        const noiYear = noi * Math.pow(1 + incGrowth, year - 1);
+        const cashFlowYear = noiYear - annualDebtService; // assume fixed-rate loan
+        totalCashFlow += cashFlowYear;
+      }
+
+      const simpleRoi =
+        totalCashInvested > 0 ? totalCashFlow / totalCashInvested : 0;
+
+      const projectedValue = P * Math.pow(1 + valGrowth, h);
+
+      return {
+        years: h,
+        totalCashFlow,
+        simpleRoi,
+        projectedValue,
+      };
+    });
   }
 
   return (
@@ -196,8 +229,9 @@ function RealEstateRoiCalculator() {
       </h2>
       <p className="text-sm text-slate-600 max-w-2xl">
         Estimate cap rate, cash-on-cash return, and DSCR to understand if a
-        rental or commercial property is worth the risk. No judgment, just
-        numbers.
+        rental or commercial property is worth the risk. Then see how the
+        deal might look over 3, 5, and 10 years with simple growth
+        assumptions. No judgment, just numbers.
       </p>
 
       <div className="grid gap-6 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
@@ -208,6 +242,229 @@ function RealEstateRoiCalculator() {
               Property &amp; One-Time Costs
             </h3>
             <div className="grid gap-4 md:grid-cols-3">
+              <RoiField
+                label="Purchase price"
+                prefix="$"
+                value={purchasePrice}
+                onChange={setPurchasePrice}
+              />
+              <RoiField
+                label="Closing costs"
+                prefix="$"
+                value={closingCosts}
+                onChange={setClosingCosts}
+              />
+              <RoiField
+                label="Rehab / initial work"
+                prefix="$"
+                value={rehabCosts}
+                onChange={setRehabCosts}
+              />
+            </div>
+          </div>
+
+          <div className="rounded-2xl bg-white p-5 shadow border border-slate-100">
+            <h3 className="text-lg font-semibold text-slate-900 mb-3">
+              Income &amp; Vacancy
+            </h3>
+            <div className="grid gap-4 md:grid-cols-3">
+              <RoiField
+                label="Monthly rent"
+                prefix="$"
+                value={monthlyRent}
+                onChange={setMonthlyRent}
+              />
+              <RoiField
+                label="Other monthly income"
+                prefix="$"
+                value={otherIncome}
+                onChange={setOtherIncome}
+              />
+              <RoiField
+                label="Vacancy rate"
+                suffix="%"
+                value={vacancyRate}
+                onChange={setVacancyRate}
+              />
+            </div>
+          </div>
+
+          <div className="rounded-2xl bg-white p-5 shadow border border-slate-100 space-y-4">
+            <h3 className="text-lg font-semibold text-slate-900 mb-1">
+              Operating Expenses &amp; Financing
+            </h3>
+            <div className="grid gap-4 md:grid-cols-4">
+              <RoiField
+                label="OpEx as % of EGI"
+                suffix="%"
+                value={opExPercent}
+                onChange={setOpExPercent}
+              />
+              <RoiField
+                label="Down payment"
+                suffix="%"
+                value={downPaymentPercent}
+                onChange={setDownPaymentPercent}
+              />
+              <RoiField
+                label="Interest rate"
+                suffix="%"
+                value={interestRate}
+                onChange={setInterestRate}
+              />
+              <RoiField
+                label="Loan term (years)"
+                value={loanTermYears}
+                onChange={setLoanTermYears}
+              />
+            </div>
+
+            {/* NEW: projection assumptions */}
+            <div className="grid gap-4 md:grid-cols-2 pt-2 border-t border-slate-100">
+              <RoiField
+                label="Annual rent & expenses growth"
+                suffix="%"
+                value={incomeGrowthRate}
+                onChange={setIncomeGrowthRate}
+              />
+              <RoiField
+                label="Annual property value growth"
+                suffix="%"
+                value={valueGrowthRate}
+                onChange={setValueGrowthRate}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Results */}
+        <div className="space-y-6">
+          <div className="rounded-2xl bg-white p-5 shadow border border-slate-100">
+            <h3 className="text-lg font-semibold text-slate-900 mb-3">
+              Key Metrics (Year 1)
+            </h3>
+
+            {!results ? (
+              <p className="text-sm text-slate-500">
+                Enter property values to see cap rate, cash-on-cash, and DSCR.
+              </p>
+            ) : (
+              <>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <RoiMetricTile
+                    label="Cap Rate"
+                    value={roiFormatPercent(results.capRate)}
+                  />
+                  <RoiMetricTile
+                    label="Cash-on-Cash"
+                    value={roiFormatPercent(results.cashOnCash)}
+                  />
+                  <RoiMetricTile
+                    label="DSCR"
+                    value={results.dscr.toFixed(2)}
+                    emphasize={
+                      results.dscr < 1.2
+                        ? 'bad'
+                        : results.dscr < 1.3
+                        ? 'warn'
+                        : 'good'
+                    }
+                  />
+                  <RoiMetricTile
+                    label="Annual Cash Flow"
+                    value={roiFormatCurrency(results.annualCashFlow)}
+                    emphasize={
+                      results.annualCashFlow < 0 ? 'bad' : 'good'
+                    }
+                  />
+                </div>
+
+                <hr className="my-4" />
+
+                <dl className="space-y-1 text-sm text-slate-700">
+                  <RoiRow label="NOI" value={roiFormatCurrency(results.noi)} />
+                  <RoiRow
+                    label="Annual Debt Service"
+                    value={roiFormatCurrency(
+                      results.annualDebtService
+                    )}
+                  />
+                  <RoiRow
+                    label="Total Cash Invested"
+                    value={roiFormatCurrency(
+                      results.totalCashInvested
+                    )}
+                  />
+                  <RoiRow
+                    label="Loan Amount"
+                    value={roiFormatCurrency(results.loanAmount)}
+                  />
+                </dl>
+              </>
+            )}
+          </div>
+
+          {/* NEW: multi-year snapshot */}
+          <div className="rounded-2xl bg-slate-900 p-4 text-sm text-slate-100">
+            <p className="font-semibold mb-2">
+              Multi-year snapshot (rough)
+            </p>
+            {!results ? (
+              <p className="text-xs text-slate-300">
+                Once you enter numbers above, you&apos;ll see 3 / 5 / 10-year
+                projections here.
+              </p>
+            ) : (
+              <>
+                <p className="text-[11px] text-slate-300 mb-2">
+                  Assumes fixed-rate debt, simple annual growth for income and
+                  property value, and ignores taxes and big cap-ex. Use it as a
+                  quick directional view, not a full underwriting model.
+                </p>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full text-xs">
+                    <thead>
+                      <tr className="text-slate-300 border-b border-slate-700">
+                        <th className="py-1 pr-4 text-left">Years</th>
+                        <th className="py-1 px-4 text-right">
+                          Total cash flow
+                        </th>
+                        <th className="py-1 px-4 text-right">
+                          Simple ROI
+                        </th>
+                        <th className="py-1 pl-4 text-right">
+                          Projected value
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {projections.map((p) => (
+                        <tr key={p.years} className="border-b border-slate-800/60">
+                          <td className="py-1 pr-4">
+                            {p.years} yrs
+                          </td>
+                          <td className="py-1 px-4 text-right font-mono">
+                            {roiFormatCurrency(p.totalCashFlow)}
+                          </td>
+                          <td className="py-1 px-4 text-right font-mono">
+                            {roiFormatPercent(p.simpleRoi)}
+                          </td>
+                          <td className="py-1 pl-4 text-right font-mono">
+                            {roiFormatCurrency(p.projectedValue)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
               <RoiField
                 label="Purchase price"
                 prefix="$"
