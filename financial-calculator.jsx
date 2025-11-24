@@ -1672,16 +1672,20 @@ const MoneyMapLogo = ({ size = 32 }) => (
         <stop offset="1" stopColor="#19A39D" />
       </linearGradient>
     </defs>
+
+    {/* Rounded square background */}
     <rect
       x="3"
       y="3"
       width="26"
       height="26"
       rx="8"
-      stroke="#0A1A2F"
+      stroke="#020617"
       strokeWidth="1.4"
-      fill="none"
+      fill="#020617"
     />
+
+    {/* Lower arc = path / journey */}
     <path
       d="M6 22C9.2 19 11.5 17.5 13.8 16.6C16.1 15.8 18.2 15.8 20.2 16.3C22.2 16.8 24 17.8 26 19.5"
       stroke="url(#mmGradient)"
@@ -1689,13 +1693,17 @@ const MoneyMapLogo = ({ size = 32 }) => (
       strokeLinecap="round"
       strokeLinejoin="round"
     />
+
+    {/* Upper arc = data / analytics */}
     <path
-      d="M8 18.5C10.3 16 12.4 14.7 14.4 14.0C16.4 13.3 18.3 13.2 20.1 13.6C21.9 14.0 23.5 14.9 25 16.3"
+      d="M8 18.5C10.3 16 12.4 14.7 14.4 14C16.4 13.3 18.3 13.2 20.1 13.6C21.9 14 23.5 14.9 25 16.3"
       stroke="url(#mmGradient)"
       strokeWidth="1.6"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
+
+    {/* Target node */}
     <circle cx="25.2" cy="16.3" r="1.4" fill="#19A39D" />
   </svg>
 );
@@ -1705,126 +1713,129 @@ const FinancialCalculatorApp = () => {
   const [showPrivacy, setShowPrivacy] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-slate-950 text-slate-900">
+      {/* Soft grid background */}
+      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.08),_transparent_55%),radial-gradient(circle_at_bottom,_rgba(45,212,191,0.06),_transparent_55%)] opacity-90" />
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
         {/* Header */}
-        <header className="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-40">
-          <div className="max-w-7xl mx-auto px-6 py-4">
-            <div className="flex justify-between items-center">
-              {/* Brand */}
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-white border border-slate-200 shadow-sm">
-                  <MoneyMapLogo size={28} />
-                </div>
-                <div>
-                  <h1 className="text-2xl font-bold bg-gradient-to-r from-[#0A6375] via-[#0C3C75] to-[#19A39D] bg-clip-text text-transparent">
-                    MoneyMap
-                  </h1>
-                  <p className="text-xs text-slate-600">
-                    Chart your financial future—quietly, on your own terms.
-                  </p>
-                </div>
+        <header className="backdrop-blur bg-slate-950/70 border border-slate-800 rounded-2xl px-4 sm:px-6 py-3.5 sm:py-4 shadow-[0_18px_60px_rgba(15,23,42,0.6)]">
+          <div className="flex justify-between items-center gap-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-xl bg-slate-900 border border-slate-700 shadow-inner">
+                <MoneyMapLogo size={28} />
               </div>
-              {/* Privacy button */}
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setShowPrivacy(true)}
-                  className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-full text-xs font-medium hover:bg-emerald-100 border border-emerald-100"
-                >
-                  <Shield size={14} />
-                  <span>How your data is handled</span>
-                </button>
+              <div>
+                <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-slate-50">
+                  MoneyMap
+                </h1>
+                <p className="text-[11px] sm:text-xs text-slate-400">
+                  Chart your financial future quietly, on your own terms.
+                </p>
               </div>
             </div>
+            <button
+              onClick={() => setShowPrivacy(true)}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 text-[11px] sm:text-xs font-medium hover:bg-emerald-500/15 transition-colors"
+            >
+              <Shield size={14} />
+              <span>How your data is handled</span>
+            </button>
           </div>
         </header>
 
         {/* Privacy modal */}
         {showPrivacy && (
-          <div className="fixed inset-0 bg-slate-900/40 flex items-center justify-center z-50">
-            <div className="bg-white max-w-lg w-full mx-4 rounded-2xl shadow-xl p-5 relative">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur">
+            <div className="relative w-full max-w-md mx-4 rounded-2xl bg-slate-950 border border-slate-800 shadow-2xl p-5 sm:p-6">
               <button
-                className="absolute top-3 right-3 text-slate-400 hover:text-slate-600"
+                className="absolute top-3 right-3 text-slate-500 hover:text-slate-300"
                 onClick={() => setShowPrivacy(false)}
               >
                 <X size={18} />
               </button>
-              <h2 className="text-lg font-semibold text-slate-900 mb-2">
+              <h2 className="text-base sm:text-lg font-semibold text-slate-50 mb-2">
                 Privacy first
               </h2>
-              <p className="text-sm text-slate-700 mb-3">
-                Nothing you type here is sent to a server for calculations. The
-                math runs in your browser. You can close the tab and it&apos;s
-                gone.
+              <p className="text-xs sm:text-sm text-slate-300 mb-3">
+                Everything you type is calculated locally in your browser.
+                No accounts, no bank connections, no credit checks—just
+                numbers to help you think more clearly.
               </p>
-              <ul className="text-xs text-slate-600 list-disc list-inside space-y-1">
-                <li>No account required.</li>
-                <li>No credit pulls, no bank connections.</li>
-                <li>You&apos;re just running numbers quietly for yourself.</li>
+              <ul className="text-[11px] sm:text-xs text-slate-400 list-disc list-inside space-y-1">
+                <li>No account or login required.</li>
+                <li>No data sent to a server for the calculations.</li>
+                <li>Close the tab and the numbers are gone.</li>
               </ul>
             </div>
           </div>
         )}
 
-        {/* Tabs */}
-        <div className="bg-white border-b border-slate-200">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="flex gap-2 overflow-x-auto py-3">
-              <TabButton
-                icon={DollarSign}
-                label="Budget"
-                active={activeTab === 'budget'}
-                onClick={() => setActiveTab('budget')}
-              />
-              <TabButton
-                icon={Car}
-                label="Auto loan"
-                active={activeTab === 'auto'}
-                onClick={() => setActiveTab('auto')}
-              />
-              <TabButton
-                icon={Home}
-                label="Mortgage"
-                active={activeTab === 'mortgage'}
-                onClick={() => setActiveTab('mortgage')}
-              />
-              <TabButton
-                icon={Shield}
-                label="Debt payoff"
-                active={activeTab === 'debt'}
-                onClick={() => setActiveTab('debt')}
-              />
-              <TabButton
-                icon={PiggyBankIcon}
-                label="Savings"
-                active={activeTab === 'savings'}
-                onClick={() => setActiveTab('savings')}
-              />
-              <TabButton
-                icon={TrendingUp}
-                label="Real estate ROI"
-                active={activeTab === 'roi'}
-                onClick={() => setActiveTab('roi')}
-              />
-            </div>
-          </div>
-        </div>
+        {/* Shell: main + insights sidebar */}
+        <div className="grid gap-4 sm:gap-6 lg:grid-cols-[minmax(0,1.65fr)_minmax(280px,0.95fr)]">
+          {/* MAIN COLUMN */}
+          <div className="space-y-4 sm:space-y-5">
+            {/* Tabs */}
+            <nav className="backdrop-blur bg-slate-950/70 border border-slate-800 rounded-2xl px-3 sm:px-4 py-2.5 shadow-[0_12px_45px_rgba(15,23,42,0.5)]">
+              <div className="flex gap-2 overflow-x-auto no-scrollbar">
+                <TabButton
+                  icon={DollarSign}
+                  label="Budget"
+                  active={activeTab === 'budget'}
+                  onClick={() => setActiveTab('budget')}
+                />
+                <TabButton
+                  icon={Car}
+                  label="Auto loan"
+                  active={activeTab === 'auto'}
+                  onClick={() => setActiveTab('auto')}
+                />
+                <TabButton
+                  icon={Home}
+                  label="Mortgage"
+                  active={activeTab === 'mortgage'}
+                  onClick={() => setActiveTab('mortgage')}
+                />
+                <TabButton
+                  icon={Shield}
+                  label="Debt payoff"
+                  active={activeTab === 'debt'}
+                  onClick={() => setActiveTab('debt')}
+                />
+                <TabButton
+                  icon={PiggyBankIcon}
+                  label="Savings"
+                  active={activeTab === 'savings'}
+                  onClick={() => setActiveTab('savings')}
+                />
+                <TabButton
+                  icon={TrendingUp}
+                  label="Real estate ROI"
+                  active={activeTab === 'roi'}
+                  onClick={() => setActiveTab('roi')}
+                />
+              </div>
+            </nav>
 
-        {/* Main content */}
-        <main className="max-w-7xl mx-auto px-6 py-8 space-y-8">
-          {activeTab === 'budget' && <BudgetTab />}
-          {activeTab === 'auto' && <AutoLoanTab />}
-          {activeTab === 'mortgage' && <MortgageTab />}
-          {activeTab === 'debt' && <DebtPayoffTab />}
-          {activeTab === 'savings' && <SavingsTab />}
-          {activeTab === 'roi' && <RealEstateRoiCalculator />}
-        </main>
+            {/* Active tool */}
+            <section className="rounded-2xl border border-slate-800 bg-slate-950/80 shadow-[0_18px_60px_rgba(15,23,42,0.6)] p-4 sm:p-5 lg:p-6">
+              {activeTab === 'budget' && <BudgetTab />}
+              {activeTab === 'auto' && <AutoLoanTab />}
+              {activeTab === 'mortgage' && <MortgageTab />}
+              {activeTab === 'debt' && <DebtPayoffTab />}
+              {activeTab === 'savings' && <SavingsTab />}
+              {activeTab === 'roi' && <RealEstateRoiCalculator />}
+            </section>
+          </div>
+
+          {/* INSIGHTS SIDEBAR */}
+          <InsightsSidebar activeTab={activeTab} />
+        </div>
       </div>
     </div>
   );
-}
+};
 
-/* Small icon wrapper for savings tab */
+/* Small icon wrapper for savings tab label */
 function PiggyBankIcon(props) {
   return <Calculator {...props} />;
 }
@@ -1835,15 +1846,119 @@ function TabButton({ icon: Icon, label, active, onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${
+      className={`flex items-center gap-2 px-4 sm:px-5 py-2 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap transition-all ${
         active
-          ? 'bg-gradient-to-r from-blue-600 to-teal-600 text-white shadow-md scale-[1.02]'
-          : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+          ? 'bg-gradient-to-r from-sky-500 to-emerald-500 text-slate-50 shadow-md shadow-emerald-500/30 scale-[1.02]'
+          : 'bg-slate-900/60 text-slate-300 hover:bg-slate-800'
       }`}
     >
-      <Icon size={18} />
+      <Icon size={16} />
       <span>{label}</span>
     </button>
+  );
+}
+
+/* Right-hand insights panel */
+function InsightsSidebar({ activeTab }) {
+  let title = '';
+  let bullets = [];
+  let tag = '';
+
+  switch (activeTab) {
+    case 'budget':
+      title = 'Budget guardrails';
+      tag = 'Everyday money';
+      bullets = [
+        'Aim for roughly 50% needs, 30% wants, 20% savings/debt payoff. It will flex month to month.',
+        'If your needs are heavy right now, start by pushing wants down—small cuts beat no plan.',
+        'Any positive leftover is a win. Automate moving part of it to savings or debt.'
+      ];
+      break;
+    case 'auto':
+      title = 'Car payment sanity checks';
+      tag = 'Big purchases';
+      bullets = [
+        'Many people aim for car payments ≤ 10–15% of net take-home pay.',
+        'Add insurance, gas, and maintenance when you think about the “real” cost.',
+        'A solid used car with a cheaper payment often beats stretching for new.'
+      ];
+      break;
+    case 'mortgage':
+      title = 'Homebuying guardrails';
+      tag = 'Housing';
+      bullets = [
+        'Lenders typically care about % of gross income. You live on net income, not gross.',
+        'Keep total housing ideally around 30–35% of take-home pay if you want room to breathe.',
+        'Don’t drain every dollar into the down payment—emergency cash still matters.'
+      ];
+      break;
+    case 'debt':
+      title = 'Getting to debt-free faster';
+      tag = 'Debt strategy';
+      bullets = [
+        'Avalanche = lowest interest cost. Snowball = more motivation via quick wins.',
+        'Protect essentials first: housing, food, utilities, minimum payments—then add extra.',
+        'Consistency beats perfection. A small, automatic extra payment adds up over time.'
+      ];
+      break;
+    case 'savings':
+      title = 'Let compounding work for you';
+      tag = 'Investing basics';
+      bullets = [
+        'Time in the market usually matters more than perfect timing of the market.',
+        'Even small monthly contributions can grow meaningfully over 10–20 years.',
+        'Match the return assumption to your risk comfort—this is only a rough illustration.'
+      ];
+      break;
+    case 'roi':
+      title = 'Real-estate lens';
+      tag = 'Investor view';
+      bullets = [
+        'Cap rate = property return if you paid all cash. It ignores financing.',
+        'Cash-on-cash focuses on your actual cash invested (down, closing, rehab).',
+        'DSCR compares NOI to your loan payments. Many lenders like ≥ 1.20—higher is safer.'
+      ];
+      break;
+    default:
+      break;
+  }
+
+  return (
+    <aside className="hidden lg:flex flex-col gap-4">
+      <div className="rounded-2xl border border-slate-800 bg-slate-950/90 shadow-[0_18px_60px_rgba(15,23,42,0.7)] p-4">
+        <div className="flex items-center justify-between mb-2">
+          <span className="inline-flex items-center gap-1 rounded-full bg-slate-900 px-2 py-1 text-[10px] font-medium text-slate-300 border border-slate-700/70">
+            <BarChart3 size={12} /> {tag || 'Money tips'}
+          </span>
+          <span className="text-[10px] text-slate-500 flex items-center gap-1">
+            <Info size={12} />
+            Context only, not advice
+          </span>
+        </div>
+        <h3 className="text-sm font-semibold text-slate-50 mb-2">
+          {title || 'MoneyMap insights'}
+        </h3>
+        <ul className="space-y-2 text-[11px] text-slate-300 leading-relaxed">
+          {bullets.map((b, idx) => (
+            <li key={idx} className="flex gap-2">
+              <span className="mt-[3px] inline-block h-1.5 w-1.5 rounded-full bg-emerald-400" />
+              <span>{b}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="rounded-2xl border border-slate-800 bg-slate-950/80 p-4 text-[10px] text-slate-400 space-y-2">
+        <p className="font-semibold text-slate-200 text-xs">
+          Reminder
+        </p>
+        <p>
+          MoneyMap is a sandbox. It is not financial advice and does not know
+          your full situation. Use it to pressure-test ideas before you make
+          decisions in the real world.
+        </p>
+      </div>
+    </aside>
   );
 }
 
