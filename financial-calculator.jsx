@@ -36,10 +36,7 @@ const formatCurrency = (n) =>
     style: 'currency',
     currency: 'USD',
     maximumFractionDigits: 0,
-  }).format(n);
-
-const formatPercent = (n, digits = 1) =>
-  `${(n * 100).toFixed(digits)}%`;
+  }).format(n ?? 0);
 
 /* ---------- Inline tooltip label for literacy ---------- */
 function TermTooltipLabel({ term, label }) {
@@ -77,24 +74,24 @@ function TermTooltipLabel({ term, label }) {
       <span>{label}</span>
       <button
         type="button"
-        className="ml-1 inline-flex items-center justify-center w-4 h-4 rounded-full border border-blue-500 text-blue-600 text-[10px] hover:bg-blue-50"
+        className="ml-1 inline-flex items-center justify-center w-4 h-4 rounded-full border border-emerald-400 text-emerald-300 text-[10px] hover:bg-emerald-500/10"
         onClick={() => setOpen((v) => !v)}
       >
         ?
       </button>
       {open && (
-        <div className="absolute z-50 mt-1 w-64 rounded-md border border-slate-200 bg-white shadow-lg p-3 text-xs text-slate-700">
+        <div className="absolute z-50 mt-1 w-72 rounded-md border border-slate-700 bg-slate-900 shadow-xl p-3 text-xs text-slate-100">
           <div className="flex items-start justify-between gap-2 mb-1">
-            <div className="font-semibold text-slate-900">{tip.title}</div>
+            <div className="font-semibold">{tip.title}</div>
             <button
               type="button"
-              className="text-slate-400 hover:text-slate-600"
+              className="text-slate-400 hover:text-slate-200"
               onClick={() => setOpen(false)}
             >
               <X size={12} />
             </button>
           </div>
-          <p className="leading-snug">{tip.text}</p>
+          <p className="leading-snug text-slate-300">{tip.text}</p>
         </div>
       )}
     </span>
@@ -103,13 +100,12 @@ function TermTooltipLabel({ term, label }) {
 
 /* =======================================================
    REAL ESTATE ROI / CAP RATE / CASH-ON-CASH CALCULATOR
-   with simple 1 / 3 / 5 / 10-year cash-flow view
+   (Year 1 metrics – same logic you had working)
    ======================================================= */
 
-const roiFormatCurrency = (n) =>
+const roiCurrency = (n) =>
   n.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
-
-const roiFormatPercent = (n) => `${(n * 100).toFixed(1)}%`;
+const roiPercent = (n) => `${(n * 100).toFixed(1)}%`;
 
 function RealEstateRoiCalculator() {
   const [purchasePrice, setPurchasePrice] = useState('300000');
@@ -140,7 +136,6 @@ function RealEstateRoiCalculator() {
   const years = parseNumber(loanTermYears);
 
   let results = null;
-  let horizons = [];
 
   if (P > 0 && years > 0) {
     const loanAmount = P * (1 - dpPct);
@@ -186,38 +181,26 @@ function RealEstateRoiCalculator() {
       cashOnCash,
       dscr,
     };
-
-    const horizonYears = [1, 3, 5, 10];
-    horizons = horizonYears.map((yrs) => {
-      const cumulativeCashFlow = annualCashFlow * yrs;
-      const simpleROI =
-        totalCashInvested > 0 ? cumulativeCashFlow / totalCashInvested : 0;
-      return {
-        label: `${yrs} year${yrs === 1 ? '' : 's'}`,
-        years: yrs,
-        cumulativeCashFlow,
-        simpleROI,
-      };
-    });
   }
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-slate-900">
-        Real Estate ROI
-      </h2>
-      <p className="text-sm text-slate-600 max-w-2xl">
-        Estimate cap rate, cash-on-cash return, and DSCR to understand if a
-        rental or commercial property is worth the risk. Then see simple
-        1 / 3 / 5 / 10-year cash-flow projections using your assumptions.
-      </p>
+      <div>
+        <h2 className="text-xl font-semibold text-slate-50">
+          Real Estate ROI
+        </h2>
+        <p className="text-sm text-slate-400 max-w-2xl mt-1">
+          Estimate cap rate, cash-on-cash return, and DSCR to understand if a
+          rental or commercial property fits your risk and cash flow comfort.
+        </p>
+      </div>
 
-      <div className="grid gap-6 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
         {/* Inputs */}
-        <div className="space-y-6">
-          <div className="rounded-2xl bg-white p-5 shadow border border-slate-100">
-            <h3 className="text-lg font-semibold text-slate-900 mb-3">
-              Property &amp; One-Time Costs
+        <div className="space-y-5">
+          <div className="rounded-2xl bg-slate-900/70 border border-slate-800 p-5">
+            <h3 className="text-sm font-semibold text-slate-100 mb-3">
+              Property & one-time costs
             </h3>
             <div className="grid gap-4 md:grid-cols-3">
               <RoiField
@@ -241,9 +224,9 @@ function RealEstateRoiCalculator() {
             </div>
           </div>
 
-          <div className="rounded-2xl bg-white p-5 shadow border border-slate-100">
-            <h3 className="text-lg font-semibold text-slate-900 mb-3">
-              Income &amp; Vacancy
+          <div className="rounded-2xl bg-slate-900/70 border border-slate-800 p-5">
+            <h3 className="text-sm font-semibold text-slate-100 mb-3">
+              Income & vacancy
             </h3>
             <div className="grid gap-4 md:grid-cols-3">
               <RoiField
@@ -267,9 +250,9 @@ function RealEstateRoiCalculator() {
             </div>
           </div>
 
-          <div className="rounded-2xl bg-white p-5 shadow border border-slate-100">
-            <h3 className="text-lg font-semibold text-slate-900 mb-3">
-              Operating Expenses &amp; Financing
+          <div className="rounded-2xl bg-slate-900/70 border border-slate-800 p-5">
+            <h3 className="text-sm font-semibold text-slate-100 mb-3">
+              Operating expenses & financing
             </h3>
             <div className="grid gap-4 md:grid-cols-4">
               <RoiField
@@ -300,27 +283,27 @@ function RealEstateRoiCalculator() {
         </div>
 
         {/* Results */}
-        <div className="space-y-6">
-          <div className="rounded-2xl bg-white p-5 shadow border border-slate-100">
-            <h3 className="text-lg font-semibold text-slate-900 mb-3">
-              Key Metrics (Year 1)
+        <div className="space-y-5">
+          <div className="rounded-2xl bg-slate-900/80 border border-slate-800 p-5">
+            <h3 className="text-sm font-semibold text-slate-100 mb-3">
+              Key metrics (year 1)
             </h3>
 
             {!results ? (
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-slate-400">
                 Enter property values to see cap rate, cash-on-cash, DSCR, and
-                multi-year cash-flow.
+                cash flow.
               </p>
             ) : (
               <>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <RoiMetricTile
-                    label="Cap Rate"
-                    value={roiFormatPercent(results.capRate)}
+                    label="Cap rate"
+                    value={roiPercent(results.capRate)}
                   />
                   <RoiMetricTile
-                    label="Cash-on-Cash (Year 1)"
-                    value={roiFormatPercent(results.cashOnCash)}
+                    label="Cash-on-cash"
+                    value={roiPercent(results.cashOnCash)}
                   />
                   <RoiMetricTile
                     label="DSCR"
@@ -334,99 +317,52 @@ function RealEstateRoiCalculator() {
                     }
                   />
                   <RoiMetricTile
-                    label="Annual Cash Flow"
-                    value={roiFormatCurrency(results.annualCashFlow)}
-                    emphasize={
-                      results.annualCashFlow < 0 ? 'bad' : 'good'
-                    }
+                    label="Annual cash flow"
+                    value={roiCurrency(results.annualCashFlow)}
+                    emphasize={results.annualCashFlow < 0 ? 'bad' : 'good'}
                   />
                 </div>
 
-                <hr className="my-4" />
+                <hr className="my-4 border-slate-800" />
 
-                <dl className="space-y-1 text-sm text-slate-700">
-                  <RoiRow label="NOI" value={roiFormatCurrency(results.noi)} />
+                <dl className="space-y-1 text-sm text-slate-300">
+                  <RoiRow label="NOI" value={roiCurrency(results.noi)} />
                   <RoiRow
                     label="Annual debt service"
-                    value={roiFormatCurrency(
-                      results.annualDebtService
-                    )}
+                    value={roiCurrency(results.annualDebtService)}
                   />
                   <RoiRow
                     label="Total cash invested"
-                    value={roiFormatCurrency(
-                      results.totalCashInvested
-                    )}
+                    value={roiCurrency(results.totalCashInvested)}
                   />
                   <RoiRow
                     label="Loan amount"
-                    value={roiFormatCurrency(results.loanAmount)}
+                    value={roiCurrency(results.loanAmount)}
                   />
                 </dl>
-
-                {horizons.length > 0 && (
-                  <>
-                    <hr className="my-4" />
-                    <h4 className="text-sm font-semibold text-slate-900 mb-1">
-                      Simple horizon view (cash flow only)
-                    </h4>
-                    <p className="text-[11px] text-slate-500 mb-2">
-                      This assumes Year-1 cash flow stays the same, ignores
-                      appreciation and principal paydown. It&apos;s just a
-                      quick gut-check.
-                    </p>
-                    <div className="grid grid-cols-2 gap-2 text-xs">
-                      {horizons.map((h) => (
-                        <div
-                          key={h.years}
-                          className="border border-slate-200 rounded-lg px-3 py-2 bg-slate-50"
-                        >
-                          <div className="flex justify-between mb-1">
-                            <span className="font-semibold">
-                              {h.label}
-                            </span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span>Cash flow</span>
-                            <span className="font-mono">
-                              {roiFormatCurrency(h.cumulativeCashFlow)}
-                            </span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span>Cash-on-cash (cum.)</span>
-                            <span className="font-mono">
-                              {roiFormatPercent(h.simpleROI)}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </>
-                )}
               </>
             )}
           </div>
 
-          <div className="rounded-2xl bg-slate-900 p-4 text-sm text-slate-100">
-            <p className="font-semibold mb-2">How to read this:</p>
-            <ul className="space-y-1 list-disc list-inside">
+          <div className="rounded-2xl bg-slate-950/80 border border-slate-800 p-4 text-xs text-slate-200">
+            <p className="font-semibold mb-2">How to read this</p>
+            <ul className="space-y-1 list-disc list-inside text-slate-300">
               <li>
-                <span className="font-semibold">Cap Rate</span> is the
+                <span className="font-semibold">Cap rate</span> is the
                 property&apos;s return if you paid all cash.
               </li>
               <li>
-                <span className="font-semibold">Cash-on-Cash</span> shows
-                return on your actual cash invested (down payment +
-                closing + rehab).
+                <span className="font-semibold">Cash-on-cash</span> is return on
+                your actual cash invested (down payment + closing + rehab).
               </li>
               <li>
-                <span className="font-semibold">DSCR</span> compares NOI
-                to loan payments. Many lenders like DSCR ≥ 1.20.
+                <span className="font-semibold">DSCR</span> compares NOI to loan
+                payments. Many lenders like DSCR ≥ 1.20.
               </li>
               <li>
-                The horizon boxes multiply Year-1 cash flow by 1 / 3 / 5 / 10
-                years so you can sanity-check the commitment before moving
-                forward.
+                <span className="font-semibold">Annual cash flow</span> is
+                what&apos;s left after expenses and loan payments, before taxes
+                and reserves.
               </li>
             </ul>
           </div>
@@ -438,20 +374,20 @@ function RealEstateRoiCalculator() {
 
 function RoiField({ label, value, onChange, prefix, suffix }) {
   return (
-    <label className="flex flex-col gap-1 text-sm text-slate-700">
+    <label className="flex flex-col gap-1 text-sm text-slate-200">
       <span>{label}</span>
-      <div className="flex items-center rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+      <div className="flex items-center rounded-xl border border-slate-700 bg-slate-900 px-3 py-2">
         {prefix && (
-          <span className="mr-1 text-slate-400 text-xs">{prefix}</span>
+          <span className="mr-1 text-slate-500 text-xs">{prefix}</span>
         )}
         <input
-          className="w-full bg-transparent text-sm text-slate-900 outline-none"
+          className="w-full bg-transparent text-sm text-slate-100 outline-none"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           inputMode="decimal"
         />
         {suffix && (
-          <span className="ml-1 text-slate-400 text-xs">{suffix}</span>
+          <span className="ml-1 text-slate-500 text-xs">{suffix}</span>
         )}
       </div>
     </label>
@@ -459,14 +395,14 @@ function RoiField({ label, value, onChange, prefix, suffix }) {
 }
 
 function RoiMetricTile({ label, value, emphasize }) {
-  let color = 'text-slate-900';
-  if (emphasize === 'good') color = 'text-emerald-600';
-  if (emphasize === 'bad') color = 'text-rose-600';
-  if (emphasize === 'warn') color = 'text-amber-600';
+  let color = 'text-slate-100';
+  if (emphasize === 'good') color = 'text-emerald-400';
+  if (emphasize === 'bad') color = 'text-rose-400';
+  if (emphasize === 'warn') color = 'text-amber-300';
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
-      <div className="text-xs uppercase tracking-wide text-slate-500 mb-1">
+    <div className="rounded-xl border border-slate-800 bg-slate-900/80 px-4 py-3">
+      <div className="text-[11px] uppercase tracking-wide text-slate-400 mb-1">
         {label}
       </div>
       <div className={`text-xl font-semibold ${color} font-mono`}>
@@ -479,8 +415,8 @@ function RoiMetricTile({ label, value, emphasize }) {
 function RoiRow({ label, value }) {
   return (
     <div className="flex justify-between gap-4">
-      <dt>{label}</dt>
-      <dd className="font-mono">{value}</dd>
+      <dt className="text-slate-300">{label}</dt>
+      <dd className="font-mono text-slate-100">{value}</dd>
     </div>
   );
 }
@@ -607,15 +543,15 @@ function BudgetTab() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-2xl border border-emerald-100 bg-emerald-50/70 p-4 flex gap-3 items-start">
-        <div className="mt-1 rounded-full bg-emerald-600/90 text-white w-7 h-7 flex items-center justify-center text-sm">
+      <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-4 flex gap-3 items-start">
+        <div className="mt-1 rounded-full bg-emerald-500 text-slate-950 w-7 h-7 flex items-center justify-center text-sm">
           <BarChart3 size={16} />
         </div>
         <div className="space-y-1">
-          <h2 className="text-sm font-semibold text-emerald-900">
+          <h2 className="text-sm font-semibold text-emerald-100">
             50/30/20 in real life
           </h2>
-          <p className="text-xs text-emerald-800 leading-snug">
+          <p className="text-xs text-emerald-50/80 leading-snug">
             Start simple: aim for 50% of take-home pay to needs, 30% to
             wants, 20% to savings and debt payoff. It does not have to be
             perfect—this just gives you a target.
@@ -623,29 +559,29 @@ function BudgetTab() {
         </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
         <div className="space-y-4">
-          <div className="rounded-xl bg-white border border-slate-200 p-4">
-            <label className="text-sm text-slate-700">
+          <div className="rounded-2xl bg-slate-900/80 border border-slate-800 p-4">
+            <label className="text-sm text-slate-200">
               <TermTooltipLabel term="50-30-20" label="Monthly income" />
               <input
                 type="number"
                 value={income}
                 onChange={(e) => setIncome(e.target.value)}
-                className="mt-1 w-full px-3 py-2 border border-slate-300 rounded-lg text-sm"
+                className="mt-2 w-full px-3 py-2 border border-slate-700 rounded-lg text-sm bg-slate-950 text-slate-100"
                 placeholder="e.g. 5000"
               />
             </label>
           </div>
 
-          <div className="rounded-xl bg-white border border-slate-200 p-4 space-y-3">
+          <div className="rounded-2xl bg-slate-900/80 border border-slate-800 p-4 space-y-3">
             <div className="flex justify-between items-center mb-1">
-              <span className="text-sm font-medium text-slate-700">
+              <span className="text-sm font-medium text-slate-100">
                 Monthly expenses
               </span>
               <button
                 onClick={addExpense}
-                className="text-xs text-indigo-600 hover:text-indigo-800 font-medium"
+                className="text-xs text-emerald-300 hover:text-emerald-100 font-medium"
               >
                 + Add expense
               </button>
@@ -657,7 +593,7 @@ function BudgetTab() {
                   className="flex gap-2 items-center text-xs md:text-sm"
                 >
                   <input
-                    className="flex-1 px-2 py-2 border border-slate-300 rounded-lg text-sm"
+                    className="flex-1 px-2 py-2 border border-slate-700 rounded-lg text-sm bg-slate-950 text-slate-100"
                     placeholder="Name (rent, groceries, Netflix…)"
                     value={e.name}
                     onChange={(ev) =>
@@ -665,7 +601,7 @@ function BudgetTab() {
                     }
                   />
                   <select
-                    className="w-28 px-2 py-2 border border-slate-300 rounded-lg text-xs"
+                    className="w-28 px-2 py-2 border border-slate-700 rounded-lg text-xs bg-slate-950 text-slate-100"
                     value={e.category}
                     onChange={(ev) =>
                       updateExpense(i, 'category', ev.target.value)
@@ -677,7 +613,7 @@ function BudgetTab() {
                   </select>
                   <input
                     type="number"
-                    className="w-28 px-2 py-2 border border-slate-300 rounded-lg text-sm"
+                    className="w-28 px-2 py-2 border border-slate-700 rounded-lg text-sm bg-slate-950 text-slate-100"
                     placeholder="Amount"
                     value={e.amount}
                     onChange={(ev) =>
@@ -688,7 +624,7 @@ function BudgetTab() {
                     <button
                       type="button"
                       onClick={() => removeExpense(i)}
-                      className="text-rose-500 hover:text-rose-700"
+                      className="text-slate-500 hover:text-rose-400"
                     >
                       <X size={16} />
                     </button>
@@ -700,11 +636,11 @@ function BudgetTab() {
         </div>
 
         <div className="space-y-4">
-          <div className="rounded-xl bg-gradient-to-br from-slate-900 to-slate-800 text-slate-100 p-4">
-            <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+          <div className="rounded-2xl bg-slate-900/90 border border-slate-800 p-4">
+            <h3 className="text-sm font-semibold text-slate-100 mb-3 flex items-center gap-2">
               <PieChart size={16} /> Monthly overview
             </h3>
-            <div className="space-y-2 text-xs">
+            <div className="space-y-2 text-xs text-slate-200">
               <div className="flex justify-between">
                 <span>Total income</span>
                 <span className="font-semibold">
@@ -734,8 +670,8 @@ function BudgetTab() {
           </div>
 
           {totalIncome > 0 && (
-            <div className="rounded-xl bg-white border border-slate-200 p-4 space-y-4">
-              <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+            <div className="rounded-2xl bg-slate-900/80 border border-slate-800 p-4 space-y-4">
+              <h3 className="text-sm font-semibold text-slate-100 flex items-center gap-2">
                 <BarChart3 size={16} /> 50/30/20 comparison
               </h3>
               <div className="h-40">
@@ -748,19 +684,19 @@ function BudgetTab() {
                   label="Needs"
                   actual={needsPct}
                   ideal={50}
-                  color="bg-sky-100 text-sky-800"
+                  color="bg-sky-500/10 text-sky-100"
                 />
                 <CategoryChip
                   label="Wants"
                   actual={wantsPct}
                   ideal={30}
-                  color="bg-violet-100 text-violet-800"
+                  color="bg-violet-500/10 text-violet-100"
                 />
                 <CategoryChip
                   label="Savings"
                   actual={savingsPct}
                   ideal={20}
-                  color="bg-emerald-100 text-emerald-800"
+                  color="bg-emerald-500/10 text-emerald-100"
                 />
               </div>
             </div>
@@ -771,7 +707,7 @@ function BudgetTab() {
   );
 }
 
-/* tiny bar-chart-like component using AreaChart */
+/* ---------- Tiny bar-chart-like component using AreaChart ---------- */
 function BarChartLike({ data }) {
   const transformed = data.map((d) => ({
     name: d.name,
@@ -783,18 +719,30 @@ function BarChartLike({ data }) {
       data={transformed}
       margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
     >
-      <CartesianGrid strokeDasharray="3 3" vertical={false} />
-      <XAxis dataKey="name" tick={{ fontSize: 10 }} />
-      <YAxis tick={{ fontSize: 10 }} />
+      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1f2937" />
+      <XAxis
+        dataKey="name"
+        tick={{ fontSize: 10, fill: '#9ca3af' }}
+        axisLine={{ stroke: '#1f2937' }}
+      />
+      <YAxis
+        tick={{ fontSize: 10, fill: '#9ca3af' }}
+        axisLine={{ stroke: '#1f2937' }}
+      />
       <RechartsTooltip
+        contentStyle={{
+          backgroundColor: '#020617',
+          borderColor: '#1f2937',
+          fontSize: 11,
+        }}
         formatter={(value) => [`${value}%`, 'Actual % of income']}
       />
       <Area
         type="monotone"
         dataKey="value"
-        stroke="#0f766e"
-        fill="#0f766e"
-        fillOpacity={0.2}
+        stroke="#22c55e"
+        fill="#22c55e"
+        fillOpacity={0.25}
       />
     </AreaChart>
   );
@@ -813,15 +761,15 @@ function CategoryChip({ label, actual, ideal, color }) {
           {actual.toFixed(0)}%
         </span>
       </div>
-      <div className="text-[10px] opacity-80">
+      <div className="text-[10px] opacity-90">
         Ideal: {ideal}%{' '}
         {above && (
-          <span className="text-rose-700 font-medium">
+          <span className="text-rose-300 font-medium">
             (+{diff.toFixed(0)}%)
           </span>
         )}
         {below && (
-          <span className="text-emerald-700 font-medium">
+          <span className="text-emerald-300 font-medium">
             ({diff.toFixed(0)}%)
           </span>
         )}
@@ -859,124 +807,90 @@ function AutoLoanTab() {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-slate-900">Auto Loan</h2>
-      <p className="text-sm text-slate-600 max-w-2xl">
-        Use this to pressure-test a car payment before you walk into the
-        dealership. Focus on affordability vs &quot;how much you&apos;re
-        approved for.&quot;
-      </p>
+      <div>
+        <h2 className="text-xl font-semibold text-slate-50">Auto loan</h2>
+        <p className="text-sm text-slate-400 max-w-2xl mt-1">
+          Use this to pressure-test a car payment before you walk into the
+          dealership. Focus on affordability vs &quot;how much you&apos;re
+          approved for.&quot;
+        </p>
+      </div>
 
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid xl:grid-cols-2 gap-6">
         <div className="space-y-4">
-          <div className="rounded-xl bg-white border border-slate-200 p-4">
+          <div className="rounded-2xl bg-slate-900/80 border border-slate-800 p-4">
             <div className="grid gap-3">
-              <label className="text-sm text-slate-700">
-                Vehicle price
-                <input
-                  type="number"
-                  className="mt-1 w-full px-3 py-2 border border-slate-300 rounded-lg"
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
-                />
-              </label>
-              <label className="text-sm text-slate-700">
-                Down payment
-                <input
-                  type="number"
-                  className="mt-1 w-full px-3 py-2 border border-slate-300 rounded-lg"
-                  value={down}
-                  onChange={(e) => setDown(e.target.value)}
-                />
-              </label>
-              <label className="text-sm text-slate-700">
-                Interest rate (%)
-                <input
-                  type="number"
-                  className="mt-1 w-full px-3 py-2 border border-slate-300 rounded-lg"
-                  value={rate}
-                  onChange={(e) => setRate(e.target.value)}
-                />
-              </label>
-              <label className="text-sm text-slate-700">
-                Term (months)
-                <input
-                  type="number"
-                  className="mt-1 w-full px-3 py-2 border border-slate-300 rounded-lg"
-                  value={term}
-                  onChange={(e) => setTerm(e.target.value)}
-                />
-              </label>
-              <label className="text-sm text-slate-700">
-                Monthly take-home pay (net)
-                <input
-                  type="number"
-                  className="mt-1 w-full px-3 py-2 border border-slate-300 rounded-lg"
-                  value={netIncome}
-                  onChange={(e) => setNetIncome(e.target.value)}
-                />
-              </label>
+              <LabeledNumberInput
+                label="Vehicle price"
+                value={price}
+                onChange={setPrice}
+              />
+              <LabeledNumberInput
+                label="Down payment"
+                value={down}
+                onChange={setDown}
+              />
+              <LabeledNumberInput
+                label="Interest rate (%)"
+                value={rate}
+                onChange={setRate}
+              />
+              <LabeledNumberInput
+                label="Term (months)"
+                value={term}
+                onChange={setTerm}
+              />
+              <LabeledNumberInput
+                label="Monthly take-home pay (net)"
+                value={netIncome}
+                onChange={setNetIncome}
+              />
             </div>
           </div>
         </div>
 
         <div className="space-y-4">
-          <div className="rounded-xl bg-white border border-slate-200 p-4 text-sm space-y-2">
-            <h3 className="font-semibold text-slate-900 mb-1">
+          <div className="rounded-2xl bg-slate-900/90 border border-slate-800 p-4 text-sm space-y-2">
+            <h3 className="font-semibold text-slate-100 mb-1">
               Payment summary
             </h3>
-            <div className="flex justify-between">
-              <span>Loan amount</span>
-              <span className="font-semibold">
-                {formatCurrency(amount || 0)}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span>Monthly payment</span>
-              <span className="font-semibold text-emerald-700">
-                {formatCurrency(monthlyPayment || 0)}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span>Total interest</span>
-              <span>{formatCurrency(totalInterest || 0)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Months</span>
-              <span>{n || 0}</span>
-            </div>
+            <Row label="Loan amount" value={formatCurrency(amount || 0)} />
+            <Row
+              label="Monthly payment"
+              value={formatCurrency(monthlyPayment || 0)}
+              valueClass="text-emerald-400"
+            />
+            <Row
+              label="Total interest"
+              value={formatCurrency(totalInterest || 0)}
+            />
+            <Row label="Months" value={n || 0} />
             {parseNumber(netIncome) > 0 && (
-              <div className="flex justify-between">
-                <span>Payment as % of net</span>
-                <span
-                  className={`font-semibold ${
-                    paymentToNet > 15
-                      ? 'text-amber-600'
-                      : 'text-emerald-700'
-                  }`}
-                >
-                  {paymentToNet.toFixed(1)}%
-                </span>
-              </div>
+              <Row
+                label="Payment as % of net"
+                value={`${paymentToNet.toFixed(1)}%`}
+                valueClass={
+                  paymentToNet > 15 ? 'text-amber-300' : 'text-emerald-400'
+                }
+              />
             )}
           </div>
 
-          <div className="bg-slate-900 text-slate-100 rounded-xl p-4 text-xs space-y-2">
+          <div className="rounded-2xl bg-slate-950/80 border border-slate-800 p-4 text-xs space-y-2 text-slate-200">
             <p className="font-semibold flex items-center gap-2">
               <Car size={14} /> Guardrails
             </p>
-            <ul className="list-disc list-inside space-y-1">
+            <ul className="list-disc list-inside space-y-1 text-slate-300">
               <li>
-                Many people aim for car payments ≤ 10–15% of net take-home
-                pay.
+                Many people aim for car payments ≤ 10–15% of net take-home pay.
               </li>
               <li>
-                Total car cost (payment + insurance + gas) ideally fits
-                inside your &quot;wants&quot; bucket, not crushing your
-                savings.
+                Total car cost (payment + insurance + gas) ideally fits inside
+                your &quot;wants&quot; bucket.
               </li>
               <li>
-                A used car with a solid inspection often beats stretching to
-                a brand-new payment.
+                A solid used car with a lower payment often beats stretching for
+                a brand-new one.
               </li>
             </ul>
           </div>
@@ -1026,8 +940,7 @@ function MortgageTab() {
     monthlyPMI = (loanAmount * 0.0085) / 12;
   }
 
-  const totalMonthly =
-    monthlyPI + monthlyTax + monthlyInsurance + monthlyPMI;
+  const totalMonthly = monthlyPI + monthlyTax + monthlyInsurance + monthlyPMI;
   const pctGross =
     parseNumber(grossMonthly) > 0
       ? (totalMonthly / parseNumber(grossMonthly)) * 100
@@ -1039,38 +952,32 @@ function MortgageTab() {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-slate-900">Mortgage</h2>
-      <p className="text-sm text-slate-600 max-w-2xl">
-        Compare &quot;what the bank will approve&quot; with what actually fits
-        your monthly cash flow. Includes principal, interest, taxes,
-        insurance, and PMI / MIP estimates.
-      </p>
+      <div>
+        <h2 className="text-xl font-semibold text-slate-50">Mortgage</h2>
+        <p className="text-sm text-slate-400 max-w-2xl mt-1">
+          Compare &quot;what the bank will approve&quot; with what actually
+          fits your monthly cash flow. Includes principal, interest, taxes,
+          insurance, and PMI / MIP estimates.
+        </p>
+      </div>
 
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid xl:grid-cols-2 gap-6">
         <div className="space-y-4">
-          <div className="bg-white rounded-xl border border-slate-200 p-4 space-y-3">
-            <label className="text-sm text-slate-700">
-              Home price
-              <input
-                type="number"
-                className="mt-1 w-full px-3 py-2 border border-slate-300 rounded-lg"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-              />
-            </label>
-            <label className="text-sm text-slate-700">
-              Down payment (or leave blank for 20%)
-              <input
-                type="number"
-                className="mt-1 w-full px-3 py-2 border border-slate-300 rounded-lg"
-                value={down}
-                onChange={(e) => setDown(e.target.value)}
-              />
-            </label>
-            <label className="text-sm text-slate-700 flex flex-col">
+          <div className="bg-slate-900/80 rounded-2xl border border-slate-800 p-4 space-y-3">
+            <LabeledNumberInput
+              label="Home price"
+              value={price}
+              onChange={setPrice}
+            />
+            <LabeledNumberInput
+              label="Down payment (or leave blank for 20%)"
+              value={down}
+              onChange={setDown}
+            />
+            <label className="text-sm text-slate-200 flex flex-col gap-1">
               Loan type
               <select
-                className="mt-1 w-full px-3 py-2 border border-slate-300 rounded-lg text-sm"
+                className="w-full px-3 py-2 border border-slate-700 rounded-lg text-sm bg-slate-950 text-slate-100"
                 value={loanType}
                 onChange={(e) => setLoanType(e.target.value)}
               >
@@ -1080,10 +987,10 @@ function MortgageTab() {
               </select>
             </label>
             <div className="grid grid-cols-2 gap-3">
-              <label className="text-sm text-slate-700">
+              <label className="text-sm text-slate-200 flex flex-col gap-1">
                 Term (years)
                 <select
-                  className="mt-1 w-full px-3 py-2 border border-slate-300 rounded-lg text-sm"
+                  className="w-full px-3 py-2 border border-slate-700 rounded-lg text-sm bg-slate-950 text-slate-100"
                   value={termYears}
                   onChange={(e) => setTermYears(e.target.value)}
                 >
@@ -1093,20 +1000,16 @@ function MortgageTab() {
                   <option value="30">30</option>
                 </select>
               </label>
-              <label className="text-sm text-slate-700">
-                Rate (%)
-                <input
-                  type="number"
-                  className="mt-1 w-full px-3 py-2 border border-slate-300 rounded-lg"
-                  value={rate}
-                  onChange={(e) => setRate(e.target.value)}
-                />
-              </label>
+              <LabeledNumberInput
+                label="Rate (%)"
+                value={rate}
+                onChange={setRate}
+              />
             </div>
-            <label className="text-sm text-slate-700 flex flex-col">
+            <label className="text-sm text-slate-200 flex flex-col gap-1">
               State / territory
               <select
-                className="mt-1 w-full px-3 py-2 border border-slate-300 rounded-lg text-sm"
+                className="w-full px-3 py-2 border border-slate-700 rounded-lg text-sm bg-slate-950 text-slate-100"
                 value={state}
                 onChange={(e) => setState(e.target.value)}
               >
@@ -1118,116 +1021,77 @@ function MortgageTab() {
               </select>
             </label>
             <div className="grid grid-cols-2 gap-3">
-              <label className="text-sm text-slate-700">
-                Monthly gross income
-                <input
-                  type="number"
-                  className="mt-1 w-full px-3 py-2 border border-slate-300 rounded-lg"
-                  value={grossMonthly}
-                  onChange={(e) => setGrossMonthly(e.target.value)}
-                />
-              </label>
-              <label className="text-sm text-slate-700">
-                Monthly net (take-home)
-                <input
-                  type="number"
-                  className="mt-1 w-full px-3 py-2 border border-slate-300 rounded-lg"
-                  value={netMonthly}
-                  onChange={(e) => setNetMonthly(e.target.value)}
-                />
-              </label>
+              <LabeledNumberInput
+                label="Monthly gross income"
+                value={grossMonthly}
+                onChange={setGrossMonthly}
+              />
+              <LabeledNumberInput
+                label="Monthly net (take-home)"
+                value={netMonthly}
+                onChange={setNetMonthly}
+              />
             </div>
           </div>
         </div>
 
         <div className="space-y-4">
-          <div className="bg-white rounded-xl border border-slate-200 p-4 text-sm space-y-2">
-            <h3 className="font-semibold text-slate-900 mb-1">
+          <div className="bg-slate-900/90 rounded-2xl border border-slate-800 p-4 text-sm space-y-2">
+            <h3 className="font-semibold text-slate-100 mb-1">
               Payment breakdown
             </h3>
-            <div className="flex justify-between">
-              <span>Loan amount</span>
-              <span className="font-semibold">
-                {formatCurrency(loanAmount || 0)}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span>Principal &amp; interest</span>
-              <span className="font-semibold">
-                {formatCurrency(monthlyPI || 0)}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span>Property tax</span>
-              <span>{formatCurrency(monthlyTax || 0)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Insurance</span>
-              <span>{formatCurrency(monthlyInsurance || 0)}</span>
-            </div>
+            <Row
+              label="Loan amount"
+              value={formatCurrency(loanAmount || 0)}
+            />
+            <Row
+              label="Principal & interest"
+              value={formatCurrency(monthlyPI || 0)}
+            />
+            <Row
+              label="Property tax"
+              value={formatCurrency(monthlyTax || 0)}
+            />
+            <Row
+              label="Insurance"
+              value={formatCurrency(monthlyInsurance || 0)}
+            />
             {monthlyPMI > 0 && (
-              <div className="flex justify-between">
-                <span>PMI / MIP</span>
-                <span>{formatCurrency(monthlyPMI || 0)}</span>
-              </div>
+              <Row
+                label="PMI / MIP"
+                value={formatCurrency(monthlyPMI || 0)}
+              />
             )}
-            <div className="border-t border-slate-200 my-2" />
-            <div className="flex justify-between items-center">
-              <span>Total monthly</span>
-              <span className="font-semibold text-emerald-700">
-                {formatCurrency(totalMonthly || 0)}
-              </span>
-            </div>
+            <div className="border-t border-slate-800 my-2" />
+            <Row
+              label="Total monthly"
+              value={formatCurrency(totalMonthly || 0)}
+              valueClass="text-emerald-400"
+            />
           </div>
 
-          <div className="bg-white rounded-xl border border-slate-200 p-4 text-sm space-y-2">
-            <h3 className="font-semibold text-slate-900 mb-1 flex items-center gap-1">
+          <div className="bg-slate-950/80 rounded-2xl border border-slate-800 p-4 text-sm space-y-2">
+            <h3 className="font-semibold text-slate-100 mb-1 flex items-center gap-1">
               <Info size={14} /> Approval vs affordability
             </h3>
             {parseNumber(grossMonthly) > 0 && (
-              <div className="flex justify-between">
-                <span>As % of gross (bank view)</span>
-                <span
-                  className={`font-semibold ${
-                    pctGross > 28 ? 'text-amber-600' : 'text-emerald-700'
-                  }`}
-                >
-                  {pctGross.toFixed(1)}%
-                </span>
-              </div>
+              <Row
+                label="As % of gross (bank view)"
+                value={`${pctGross.toFixed(1)}%`}
+                valueClass={
+                  pctGross > 28 ? 'text-amber-300' : 'text-emerald-400'
+                }
+              />
             )}
             {parseNumber(netMonthly) > 0 && (
-              <div className="flex justify-between">
-                <span>As % of net (your reality)</span>
-                <span
-                  className={`font-semibold ${
-                    pctNet > 35 ? 'text-rose-600' : 'text-emerald-700'
-                  }`}
-                >
-                  {pctNet.toFixed(1)}%
-                </span>
-              </div>
+              <Row
+                label="As % of net (your reality)"
+                value={`${pctNet.toFixed(1)}%`}
+                valueClass={
+                  pctNet > 35 ? 'text-rose-300' : 'text-emerald-400'
+                }
+              />
             )}
-          </div>
-
-          <div className="bg-slate-900 text-slate-100 rounded-xl p-4 text-xs space-y-2">
-            <p className="font-semibold flex items-center gap-2">
-              <Home size={14} /> Healthy guardrails
-            </p>
-            <ul className="list-disc list-inside space-y-1">
-              <li>
-                Lenders often like housing ≤ 28% of gross income. That&apos;s for
-                qualification.
-              </li>
-              <li>
-                For affordability, many people aim for ≤ 30–35% of take-home
-                pay across housing.
-              </li>
-              <li>
-                A larger down payment reduces PMI and builds equity faster. But
-                keep some cash for emergencies.
-              </li>
-            </ul>
           </div>
         </div>
       </div>
@@ -1297,16 +1161,20 @@ function DebtPayoffTab() {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-slate-900">Debt Payoff</h2>
-      <p className="text-sm text-slate-600 max-w-2xl">
-        List your debts, pick a strategy, and see roughly how long it might
-        take to be debt-free. This is an approximation—real life will move
-        around—but it gives you a starting point.
-      </p>
+      <div>
+        <h2 className="text-xl font-semibold text-slate-50">
+          Debt payoff
+        </h2>
+        <p className="text-sm text-slate-400 max-w-2xl mt-1">
+          List your debts, pick a strategy, and see roughly how long it might
+          take to be debt-free. This is an approximation—real life will move
+          around—but it gives you a starting point.
+        </p>
+      </div>
 
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid xl:grid-cols-2 gap-6">
         <div className="space-y-4">
-          <div className="bg-white rounded-xl border border-slate-200 p-4 space-y-3">
+          <div className="bg-slate-900/80 rounded-2xl border border-slate-800 p-4 space-y-3">
             <div className="flex justify-between items-center">
               <TermTooltipLabel
                 term="avalanche"
@@ -1315,7 +1183,7 @@ function DebtPayoffTab() {
               <button
                 type="button"
                 onClick={addDebt}
-                className="text-xs text-indigo-600 hover:text-indigo-800 font-medium"
+                className="text-xs text-emerald-300 hover:text-emerald-100 font-medium"
               >
                 + Add debt
               </button>
@@ -1327,7 +1195,7 @@ function DebtPayoffTab() {
                   className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.5fr,1fr,1fr,1fr,auto] gap-3 items-center"
                 >
                   <input
-                    className="w-full px-2 py-2 border border-slate-300 rounded-lg"
+                    className="w-full px-2 py-2 border border-slate-700 rounded-lg bg-slate-950 text-slate-100"
                     placeholder="Name (Visa, Car loan…)"
                     value={d.name}
                     onChange={(e) =>
@@ -1337,7 +1205,7 @@ function DebtPayoffTab() {
 
                   <input
                     type="number"
-                    className="w-full px-2 py-2 border border-slate-300 rounded-lg"
+                    className="w-full px-2 py-2 border border-slate-700 rounded-lg bg-slate-950 text-slate-100"
                     placeholder="Balance"
                     value={d.balance}
                     onChange={(e) =>
@@ -1347,7 +1215,7 @@ function DebtPayoffTab() {
 
                   <input
                     type="number"
-                    className="w-full px-2 py-2 border border-slate-300 rounded-lg"
+                    className="w-full px-2 py-2 border border-slate-700 rounded-lg bg-slate-950 text-slate-100"
                     placeholder="Rate %"
                     value={d.rate}
                     onChange={(e) =>
@@ -1357,7 +1225,7 @@ function DebtPayoffTab() {
 
                   <input
                     type="number"
-                    className="w-full px-2 py-2 border border-slate-300 rounded-lg"
+                    className="w-full px-2 py-2 border border-slate-700 rounded-lg bg-slate-950 text-slate-100"
                     placeholder="Min pay"
                     value={d.minPayment}
                     onChange={(e) =>
@@ -1369,7 +1237,7 @@ function DebtPayoffTab() {
                     <button
                       type="button"
                       onClick={() => removeDebt(i)}
-                      className="text-slate-400 hover:text-red-500 justify-self-end"
+                      className="text-slate-500 hover:text-rose-400 justify-self-end"
                     >
                       <X size={18} />
                     </button>
@@ -1377,20 +1245,17 @@ function DebtPayoffTab() {
                 </div>
               ))}
             </div>
-            <div className="grid grid-cols-2 gap-3 pt-2 border-t border-slate-100 mt-3">
-              <label className="text-xs md:text-sm text-slate-700">
-                Extra payment toward debt each month
-                <input
-                  type="number"
-                  className="mt-1 w-full px-2 py-2 border border-slate-300 rounded-lg"
-                  value={extra}
-                  onChange={(e) => setExtra(e.target.value)}
-                />
-              </label>
-              <label className="text-xs md:text-sm text-slate-700">
+            <div className="grid grid-cols-2 gap-3 pt-2 border-t border-slate-800 mt-3">
+              <LabeledNumberInput
+                label="Extra payment toward debt each month"
+                value={extra}
+                onChange={setExtra}
+                small
+              />
+              <label className="text-xs md:text-sm text-slate-200">
                 Strategy
                 <select
-                  className="mt-1 w-full px-2 py-2 border border-slate-300 rounded-lg text-sm"
+                  className="mt-1 w-full px-2 py-2 border border-slate-700 rounded-lg text-sm bg-slate-950 text-slate-100"
                   value={method}
                   onChange={(e) => setMethod(e.target.value)}
                 >
@@ -1407,55 +1272,50 @@ function DebtPayoffTab() {
         </div>
 
         <div className="space-y-4">
-          <div className="bg-white rounded-xl border border-slate-200 p-4 text-sm space-y-2">
-            <h3 className="font-semibold text-slate-900 mb-1">
+          <div className="bg-slate-900/90 rounded-2xl border border-slate-800 p-4 text-sm space-y-2">
+            <h3 className="font-semibold text-slate-100 mb-1">
               Payoff summary (approximate)
             </h3>
-            <div className="flex justify-between">
-              <span>Total debt</span>
-              <span className="font-semibold">
-                {formatCurrency(totalDebt)}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span>Weighted avg rate</span>
-              <span className="font-semibold">
-                {avgRate.toFixed(2)}%
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span>Required minimum payments</span>
-              <span>{formatCurrency(minPayments)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Total monthly with extra</span>
-              <span className="font-semibold text-emerald-700">
-                {formatCurrency(totalPayment)}
-              </span>
-            </div>
+            <Row
+              label="Total debt"
+              value={formatCurrency(totalDebt)}
+            />
+            <Row
+              label="Weighted avg rate"
+              value={`${avgRate.toFixed(2)}%`}
+            />
+            <Row
+              label="Required minimum payments"
+              value={formatCurrency(minPayments)}
+            />
+            <Row
+              label="Total monthly with extra"
+              value={formatCurrency(totalPayment)}
+              valueClass="text-emerald-400"
+            />
             {months > 0 && (
               <>
-                <div className="border-t border-slate-200 my-2" />
+                <div className="border-t border-slate-800 my-2" />
                 <div className="flex justify-between items-center">
                   <span>Est. months to debt-free</span>
-                  <span className="font-semibold text-slate-900 flex items-center gap-1">
+                  <span className="font-semibold text-slate-100 flex items-center gap-1">
                     <Clock size={14} />
                     {Math.ceil(months)} months
                   </span>
                 </div>
-                <div className="flex justify-between">
-                  <span>Approx. total interest</span>
-                  <span>{formatCurrency(totalInterest)}</span>
-                </div>
+                <Row
+                  label="Approx. total interest"
+                  value={formatCurrency(totalInterest)}
+                />
               </>
             )}
           </div>
 
-          <div className="bg-slate-900 text-slate-100 rounded-xl p-4 text-xs space-y-2">
+          <div className="bg-slate-950/80 rounded-2xl border border-slate-800 p-4 text-xs space-y-2 text-slate-200">
             <p className="font-semibold flex items-center gap-2">
               <Shield size={14} /> Strategy tips
             </p>
-            <ul className="list-disc list-inside space-y-1">
+            <ul className="list-disc list-inside space-y-1 text-slate-300">
               <li>
                 Avalanche: pay extra toward the highest interest rate. Best
                 for minimizing interest paid.
@@ -1476,7 +1336,7 @@ function DebtPayoffTab() {
   );
 }
 
-/* ---------- Savings & investing tab ---------- */
+/* ---------- Savings tab ---------- */
 function SavingsTab() {
   const [initial, setInitial] = useState('');
   const [monthly, setMonthly] = useState('');
@@ -1518,101 +1378,92 @@ function SavingsTab() {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-slate-900">
-        Savings &amp; Investing
-      </h2>
-      <p className="text-sm text-slate-600 max-w-2xl">
-        See how your money grows over time with consistent contributions and a
-        reasonable long-term return assumption.
-      </p>
+      <div>
+        <h2 className="text-xl font-semibold text-slate-50">
+          Savings & investing
+        </h2>
+        <p className="text-sm text-slate-400 max-w-2xl mt-1">
+          See how your money grows over time with consistent contributions and a
+          reasonable long-term return assumption.
+        </p>
+      </div>
 
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid xl:grid-cols-2 gap-6">
         <div className="space-y-4">
-          <div className="bg-white rounded-xl border border-slate-200 p-4 space-y-3">
-            <label className="text-sm text-slate-700">
-              Starting amount
-              <input
-                type="number"
-                className="mt-1 w-full px-3 py-2 border border-slate-300 rounded-lg"
-                value={initial}
-                onChange={(e) => setInitial(e.target.value)}
-              />
-            </label>
-            <label className="text-sm text-slate-700">
-              Monthly contribution
-              <input
-                type="number"
-                className="mt-1 w-full px-3 py-2 border border-slate-300 rounded-lg"
-                value={monthly}
-                onChange={(e) => setMonthly(e.target.value)}
-              />
-            </label>
+          <div className="bg-slate-900/80 rounded-2xl border border-slate-800 p-4 space-y-3">
+            <LabeledNumberInput
+              label="Starting amount"
+              value={initial}
+              onChange={setInitial}
+            />
+            <LabeledNumberInput
+              label="Monthly contribution"
+              value={monthly}
+              onChange={setMonthly}
+            />
             <div className="grid grid-cols-2 gap-3">
-              <label className="text-sm text-slate-700">
-                Years
-                <input
-                  type="number"
-                  className="mt-1 w-full px-3 py-2 border border-slate-300 rounded-lg"
-                  value={years}
-                  onChange={(e) => setYears(e.target.value)}
-                />
-              </label>
-              <label className="text-sm text-slate-700">
-                Annual return (%)
-                <input
-                  type="number"
-                  className="mt-1 w-full px-3 py-2 border border-slate-300 rounded-lg"
-                  value={returnRate}
-                  onChange={(e) => setReturnRate(e.target.value)}
-                />
-              </label>
+              <LabeledNumberInput
+                label="Years"
+                value={years}
+                onChange={setYears}
+              />
+              <LabeledNumberInput
+                label="Annual return (%)"
+                value={returnRate}
+                onChange={setReturnRate}
+              />
             </div>
           </div>
         </div>
 
         <div className="space-y-4">
-          <div className="bg-white rounded-xl border border-slate-200 p-4 text-sm space-y-2">
-            <h3 className="font-semibold text-slate-900 mb-1">
+          <div className="bg-slate-900/90 rounded-2xl border border-slate-800 p-4 text-sm space-y-2">
+            <h3 className="font-semibold text-slate-100 mb-1">
               Projection
             </h3>
-            <div className="flex justify-between">
-              <span>Total contributions</span>
-              <span className="font-semibold">
-                {formatCurrency(totalContrib || 0)}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span>Projected future value</span>
-              <span className="font-semibold text-emerald-700">
-                {formatCurrency(totalFuture || 0)}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span>Estimated growth (interest)</span>
-              <span>{formatCurrency(interestEarned || 0)}</span>
-            </div>
+            <Row
+              label="Total contributions"
+              value={formatCurrency(totalContrib || 0)}
+            />
+            <Row
+              label="Projected future value"
+              value={formatCurrency(totalFuture || 0)}
+              valueClass="text-emerald-400"
+            />
+            <Row
+              label="Estimated growth (interest)"
+              value={formatCurrency(interestEarned || 0)}
+            />
           </div>
 
-          <div className="bg-white rounded-xl border border-slate-200 p-4">
+          <div className="bg-slate-900/80 rounded-2xl border border-slate-800 p-4">
             <div className="h-48">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={data}>
                   <CartesianGrid
                     strokeDasharray="3 3"
                     vertical={false}
+                    stroke="#1f2937"
                   />
                   <XAxis
                     dataKey="year"
-                    tick={{ fontSize: 10 }}
+                    tick={{ fontSize: 10, fill: '#9ca3af' }}
                     tickFormatter={(v) => `${v}y`}
+                    axisLine={{ stroke: '#1f2937' }}
                   />
                   <YAxis
-                    tick={{ fontSize: 10 }}
+                    tick={{ fontSize: 10, fill: '#9ca3af' }}
                     tickFormatter={(v) =>
                       v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v
                     }
+                    axisLine={{ stroke: '#1f2937' }}
                   />
                   <RechartsTooltip
+                    contentStyle={{
+                      backgroundColor: '#020617',
+                      borderColor: '#1f2937',
+                      fontSize: 11,
+                    }}
                     formatter={(value, key) => [
                       formatCurrency(value),
                       key === 'balance'
@@ -1624,20 +1475,20 @@ function SavingsTab() {
                     type="monotone"
                     dataKey="contributions"
                     name="Contributions"
-                    stroke="#94a3b8"
+                    stroke="#64748b"
                     strokeWidth={2}
                   />
                   <Line
                     type="monotone"
                     dataKey="balance"
                     name="Projected balance"
-                    stroke="#0f766e"
+                    stroke="#22c55e"
                     strokeWidth={2}
                   />
                 </LineChart>
               </ResponsiveContainer>
             </div>
-            <p className="mt-2 text-[11px] text-slate-500">
+            <p className="mt-2 text-[11px] text-slate-400">
               Real returns vary year to year. This assumes a steady average
               return, just to show the power of consistency + time.
             </p>
@@ -1648,7 +1499,38 @@ function SavingsTab() {
   );
 }
 
-/* ---------- Main app ---------- */
+/* ---------- Shared small UI pieces ---------- */
+
+function LabeledNumberInput({ label, value, onChange, small }) {
+  return (
+    <label
+      className={`${
+        small ? 'text-xs' : 'text-sm'
+      } text-slate-200 flex flex-col gap-1`}
+    >
+      {label}
+      <input
+        type="number"
+        className="mt-1 w-full px-3 py-2 border border-slate-700 rounded-lg bg-slate-950 text-slate-100 text-sm"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      />
+    </label>
+  );
+}
+
+function Row({ label, value, valueClass }) {
+  return (
+    <div className="flex justify-between text-sm text-slate-200">
+      <span>{label}</span>
+      <span className={`font-semibold ${valueClass ?? ''}`}>{value}</span>
+    </div>
+  );
+}
+
+/* =======================================================
+   MAIN APP WITH PREMIUM DARK LAYOUT + LEFT SIDEBAR + RIGHT TIPS
+   ======================================================= */
 
 const MoneyMapLogo = ({ size = 32 }) => (
   <svg
@@ -1667,299 +1549,349 @@ const MoneyMapLogo = ({ size = 32 }) => (
         y2="4"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stopColor="#0A6375" />
-        <stop offset="0.5" stopColor="#0C3C75" />
-        <stop offset="1" stopColor="#19A39D" />
+        <stop stopColor="#22c55e" />
+        <stop offset="0.5" stopColor="#0ea5e9" />
+        <stop offset="1" stopColor="#6366f1" />
       </linearGradient>
     </defs>
 
-    {/* Rounded square background */}
     <rect
       x="3"
       y="3"
       width="26"
       height="26"
-      rx="8"
+      rx="9"
       stroke="#020617"
       strokeWidth="1.4"
       fill="#020617"
     />
 
-    {/* Lower arc = path / journey */}
     <path
       d="M6 22C9.2 19 11.5 17.5 13.8 16.6C16.1 15.8 18.2 15.8 20.2 16.3C22.2 16.8 24 17.8 26 19.5"
       stroke="url(#mmGradient)"
-      strokeWidth="2.1"
+      strokeWidth="2.2"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
-
-    {/* Upper arc = data / analytics */}
     <path
-      d="M8 18.5C10.3 16 12.4 14.7 14.4 14C16.4 13.3 18.3 13.2 20.1 13.6C21.9 14 23.5 14.9 25 16.3"
+      d="M8 18.5C10.3 16 12.4 14.7 14.4 14.0C16.4 13.3 18.3 13.2 20.1 13.6C21.9 14.0 23.5 14.9 25 16.3"
       stroke="url(#mmGradient)"
       strokeWidth="1.6"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
-
-    {/* Target node */}
-    <circle cx="25.2" cy="16.3" r="1.4" fill="#19A39D" />
+    <circle cx="25.2" cy="16.3" r="1.5" fill="#22c55e" />
   </svg>
 );
+
+const tabs = [
+  { id: 'budget', label: 'Budget', icon: DollarSign },
+  { id: 'auto', label: 'Auto loan', icon: Car },
+  { id: 'mortgage', label: 'Mortgage', icon: Home },
+  { id: 'debt', label: 'Debt payoff', icon: Shield },
+  { id: 'savings', label: 'Savings', icon: Calculator },
+  { id: 'roi', label: 'Real estate ROI', icon: TrendingUp },
+];
+
+function TipsPanel({ activeTab }) {
+  if (activeTab === 'mortgage') {
+    return (
+      <div className="space-y-4">
+        <div className="rounded-2xl bg-slate-900/90 border border-slate-800 p-4 text-xs text-slate-200">
+          <div className="flex items-center justify-between mb-2">
+            <span className="inline-flex items-center gap-1 text-[11px] uppercase tracking-wide text-slate-400">
+              <Home size={12} /> Housing
+            </span>
+            <span className="text-[10px] text-slate-500">
+              Context only, not advice
+            </span>
+          </div>
+          <p className="font-semibold mb-1 text-slate-100">
+            Homebuying guardrails
+          </p>
+          <ul className="space-y-1.5 list-disc list-inside text-slate-300">
+            <li>
+              Lenders typically care about % of gross income. You live on net
+              income, not gross.
+            </li>
+            <li>
+              Keep total housing ideally around 30–35% of take-home pay if you
+              want room to breathe.
+            </li>
+            <li>
+              Don&apos;t drain every dollar into the down payment—emergency
+              cash still matters.
+            </li>
+          </ul>
+        </div>
+
+        <ReminderCard />
+      </div>
+    );
+  }
+
+  if (activeTab === 'debt') {
+    return (
+      <div className="space-y-4">
+        <div className="rounded-2xl bg-slate-900/90 border border-slate-800 p-4 text-xs text-slate-200">
+          <p className="font-semibold mb-1 text-slate-100">
+            Avalanche vs snowball
+          </p>
+          <ul className="space-y-1 list-disc list-inside text-slate-300">
+            <li>
+              Avalanche frees up the most interest cost. Great if you&apos;re
+              numbers-driven.
+            </li>
+            <li>
+              Snowball creates faster wins. Great if motivation is the main
+              battle.
+            </li>
+            <li>
+              Either method works better than paying &quot;whatever&apos;s
+              left&quot; with no plan.
+            </li>
+          </ul>
+        </div>
+        <ReminderCard />
+      </div>
+    );
+  }
+
+  if (activeTab === 'savings') {
+    return (
+      <div className="space-y-4">
+        <div className="rounded-2xl bg-slate-900/90 border border-slate-800 p-4 text-xs text-slate-200">
+          <p className="font-semibold mb-1 text-slate-100">
+            Compounding in plain language
+          </p>
+          <ul className="space-y-1 list-disc list-inside text-slate-300">
+            <li>
+              The earlier dollars have more time to work. Time matters more
+              than the perfect product.
+            </li>
+            <li>
+              A boring, diversified index fund plus consistency usually beats
+              chasing the &quot;perfect&quot; stock.
+            </li>
+            <li>
+              The graph here is not a prediction—just a way to see how steady
+              monthly contributions add up.
+            </li>
+          </ul>
+        </div>
+        <ReminderCard />
+      </div>
+    );
+  }
+
+  if (activeTab === 'roi') {
+    return (
+      <div className="space-y-4">
+        <div className="rounded-2xl bg-slate-900/90 border border-slate-800 p-4 text-xs text-slate-200">
+          <p className="font-semibold mb-1 text-slate-100">
+            Reading ROI metrics
+          </p>
+          <ul className="space-y-1 list-disc list-inside text-slate-300">
+            <li>
+              Cap rate helps compare properties ignoring financing. Good for
+              apples-to-apples evaluation.
+            </li>
+            <li>
+              Cash-on-cash is what your down payment is doing for you each
+              year—your personal return.
+            </li>
+            <li>
+              DSCR below ~1.2 usually feels tight. You want some room for
+              vacancies, repairs, and noise.
+            </li>
+          </ul>
+        </div>
+        <ReminderCard />
+      </div>
+    );
+  }
+
+  if (activeTab === 'auto') {
+    return (
+      <div className="space-y-4">
+        <div className="rounded-2xl bg-slate-900/90 border border-slate-800 p-4 text-xs text-slate-200">
+          <p className="font-semibold mb-1 text-slate-100">
+            Car-buying framing
+          </p>
+          <ul className="space-y-1 list-disc list-inside text-slate-300">
+            <li>
+              Total monthly car cost (payment + insurance + gas) still has to
+              fit inside your budget map.
+            </li>
+            <li>
+              If a car payment competes with your emergency fund or high-interest
+              debt payoff, that&apos;s a signal.
+            </li>
+          </ul>
+        </div>
+        <ReminderCard />
+      </div>
+    );
+  }
+
+  // Budget (default) and any others
+  return (
+    <div className="space-y-4">
+      <div className="rounded-2xl bg-slate-900/90 border border-slate-800 p-4 text-xs text-slate-200">
+        <p className="font-semibold mb-1 text-slate-100">
+          Budget map, not budget prison
+        </p>
+        <ul className="space-y-1 list-disc list-inside text-slate-300">
+          <li>
+            The 50/30/20 split is a starting line, not a grade. The point is
+            clarity, not perfection.
+          </li>
+          <li>
+            If your needs are high for now, your first move might be shrinking
+            fixed costs over time.
+          </li>
+          <li>
+            The leftover number isn&apos;t &quot;extra&quot;—it&apos;s how you
+            fund future you (savings, investing, debt payoff).
+          </li>
+        </ul>
+      </div>
+      <ReminderCard />
+    </div>
+  );
+}
+
+function ReminderCard() {
+  return (
+    <div className="rounded-2xl bg-slate-950/80 border border-slate-800 p-4 text-xs text-slate-300">
+      <p className="font-semibold mb-1 text-slate-100">Reminder</p>
+      <p>
+        MoneyMap is a sandbox. It is not financial advice and does not know your
+        full situation. Use it to pressure-test ideas before you make decisions
+        in the real world.
+      </p>
+    </div>
+  );
+}
 
 const FinancialCalculatorApp = () => {
   const [activeTab, setActiveTab] = useState('budget');
   const [showPrivacy, setShowPrivacy] = useState(false);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-900">
-      {/* Soft grid background */}
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.08),_transparent_55%),radial-gradient(circle_at_bottom,_rgba(45,212,191,0.06),_transparent_55%)] opacity-90" />
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
-        {/* Header */}
-        <header className="backdrop-blur bg-slate-950/70 border border-slate-800 rounded-2xl px-4 sm:px-6 py-3.5 sm:py-4 shadow-[0_18px_60px_rgba(15,23,42,0.6)]">
-          <div className="flex justify-between items-center gap-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-slate-900 border border-slate-700 shadow-inner">
-                <MoneyMapLogo size={28} />
-              </div>
-              <div>
-                <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-slate-50">
-                  MoneyMap
-                </h1>
-                <p className="text-[11px] sm:text-xs text-slate-400">
-                  Chart your financial future quietly, on your own terms.
-                </p>
-              </div>
+    <div className="min-h-screen bg-slate-950 text-slate-100">
+      {/* Header */}
+      <header className="border-b border-slate-800 bg-slate-950/80 backdrop-blur">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-xl bg-slate-900 border border-slate-800 shadow-sm">
+              <MoneyMapLogo size={28} />
             </div>
-            <button
-              onClick={() => setShowPrivacy(true)}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 text-[11px] sm:text-xs font-medium hover:bg-emerald-500/15 transition-colors"
-            >
-              <Shield size={14} />
-              <span>How your data is handled</span>
-            </button>
-          </div>
-        </header>
-
-        {/* Privacy modal */}
-        {showPrivacy && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur">
-            <div className="relative w-full max-w-md mx-4 rounded-2xl bg-slate-950 border border-slate-800 shadow-2xl p-5 sm:p-6">
-              <button
-                className="absolute top-3 right-3 text-slate-500 hover:text-slate-300"
-                onClick={() => setShowPrivacy(false)}
-              >
-                <X size={18} />
-              </button>
-              <h2 className="text-base sm:text-lg font-semibold text-slate-50 mb-2">
-                Privacy first
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-300 mb-3">
-                Everything you type is calculated locally in your browser.
-                No accounts, no bank connections, no credit checks—just
-                numbers to help you think more clearly.
+            <div>
+              <h1 className="text-xl font-semibold text-slate-50">
+                MoneyMap
+              </h1>
+              <p className="text-xs text-slate-400">
+                Chart your financial future quietly, on your own terms.
               </p>
-              <ul className="text-[11px] sm:text-xs text-slate-400 list-disc list-inside space-y-1">
-                <li>No account or login required.</li>
-                <li>No data sent to a server for the calculations.</li>
-                <li>Close the tab and the numbers are gone.</li>
-              </ul>
             </div>
           </div>
-        )}
+          <button
+            onClick={() => setShowPrivacy(true)}
+            className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 text-emerald-200 rounded-full text-xs font-medium hover:bg-emerald-500/20 border border-emerald-500/30"
+          >
+            <Shield size={14} />
+            <span>How your data is handled</span>
+          </button>
+        </div>
+      </header>
 
-        {/* Shell: main + insights sidebar */}
-        <div className="grid gap-4 sm:gap-6 lg:grid-cols-[minmax(0,1.65fr)_minmax(280px,0.95fr)]">
-          {/* MAIN COLUMN */}
-          <div className="space-y-4 sm:space-y-5">
-            {/* Tabs */}
-            <nav className="backdrop-blur bg-slate-950/70 border border-slate-800 rounded-2xl px-3 sm:px-4 py-2.5 shadow-[0_12px_45px_rgba(15,23,42,0.5)]">
-              <div className="flex gap-2 overflow-x-auto no-scrollbar">
-                <TabButton
-                  icon={DollarSign}
-                  label="Budget"
-                  active={activeTab === 'budget'}
-                  onClick={() => setActiveTab('budget')}
-                />
-                <TabButton
-                  icon={Car}
-                  label="Auto loan"
-                  active={activeTab === 'auto'}
-                  onClick={() => setActiveTab('auto')}
-                />
-                <TabButton
-                  icon={Home}
-                  label="Mortgage"
-                  active={activeTab === 'mortgage'}
-                  onClick={() => setActiveTab('mortgage')}
-                />
-                <TabButton
-                  icon={Shield}
-                  label="Debt payoff"
-                  active={activeTab === 'debt'}
-                  onClick={() => setActiveTab('debt')}
-                />
-                <TabButton
-                  icon={PiggyBankIcon}
-                  label="Savings"
-                  active={activeTab === 'savings'}
-                  onClick={() => setActiveTab('savings')}
-                />
-                <TabButton
-                  icon={TrendingUp}
-                  label="Real estate ROI"
-                  active={activeTab === 'roi'}
-                  onClick={() => setActiveTab('roi')}
-                />
-              </div>
-            </nav>
+      {/* Privacy modal */}
+      {showPrivacy && (
+        <div className="fixed inset-0 bg-slate-950/70 flex items-center justify-center z-50">
+          <div className="bg-slate-950 border border-slate-800 max-w-lg w-full mx-4 rounded-2xl shadow-xl p-5 relative">
+            <button
+              className="absolute top-3 right-3 text-slate-500 hover:text-slate-200"
+              onClick={() => setShowPrivacy(false)}
+            >
+              <X size={18} />
+            </button>
+            <h2 className="text-lg font-semibold text-slate-50 mb-2">
+              Privacy first
+            </h2>
+            <p className="text-sm text-slate-300 mb-3">
+              Nothing you type here is sent to a server for the math. The
+              calculations run in your browser. Close the tab and it&apos;s
+              gone.
+            </p>
+            <ul className="text-xs text-slate-400 list-disc list-inside space-y-1">
+              <li>No account required.</li>
+              <li>No credit pulls, no bank connections.</li>
+              <li>You&apos;re just running numbers quietly for yourself.</li>
+            </ul>
+          </div>
+        </div>
+      )}
 
-            {/* Active tool */}
-            <section className="rounded-2xl border border-slate-800 bg-slate-950/80 shadow-[0_18px_60px_rgba(15,23,42,0.6)] p-4 sm:p-5 lg:p-6">
-              {activeTab === 'budget' && <BudgetTab />}
-              {activeTab === 'auto' && <AutoLoanTab />}
-              {activeTab === 'mortgage' && <MortgageTab />}
-              {activeTab === 'debt' && <DebtPayoffTab />}
-              {activeTab === 'savings' && <SavingsTab />}
-              {activeTab === 'roi' && <RealEstateRoiCalculator />}
-            </section>
+      {/* Main layout */}
+      <div className="max-w-7xl mx-auto px-6 py-6 flex gap-6">
+        {/* Left sidebar */}
+        <aside className="w-56 shrink-0 hidden md:block">
+          <nav className="space-y-2">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                className={`w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all ${
+                  activeTab === tab.id
+                    ? 'bg-gradient-to-r from-emerald-500 to-sky-500 text-slate-950 shadow-md'
+                    : 'bg-slate-900/60 border border-slate-800 text-slate-300 hover:bg-slate-800/80'
+                }`}
+              >
+                <tab.icon size={16} />
+                <span>{tab.label}</span>
+              </button>
+            ))}
+          </nav>
+        </aside>
+
+        {/* Main content */}
+        <main className="flex-1 space-y-6">
+          {/* On mobile, show top tabs */}
+          <div className="md:hidden mb-2 flex gap-2 overflow-x-auto pb-1">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap ${
+                  activeTab === tab.id
+                    ? 'bg-emerald-500 text-slate-950'
+                    : 'bg-slate-800 text-slate-200'
+                }`}
+              >
+                <tab.icon size={14} />
+                <span>{tab.label}</span>
+              </button>
+            ))}
           </div>
 
-          {/* INSIGHTS SIDEBAR */}
-          <InsightsSidebar activeTab={activeTab} />
-        </div>
+          {activeTab === 'budget' && <BudgetTab />}
+          {activeTab === 'auto' && <AutoLoanTab />}
+          {activeTab === 'mortgage' && <MortgageTab />}
+          {activeTab === 'debt' && <DebtPayoffTab />}
+          {activeTab === 'savings' && <SavingsTab />}
+          {activeTab === 'roi' && <RealEstateRoiCalculator />}
+        </main>
+
+        {/* Right tips panel (desktop only) */}
+        <aside className="w-80 shrink-0 hidden lg:block">
+          <TipsPanel activeTab={activeTab} />
+        </aside>
       </div>
     </div>
   );
 };
-
-/* Small icon wrapper for savings tab label */
-function PiggyBankIcon(props) {
-  return <Calculator {...props} />;
-}
-
-/* Tab button component */
-function TabButton({ icon: Icon, label, active, onClick }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`flex items-center gap-2 px-4 sm:px-5 py-2 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap transition-all ${
-        active
-          ? 'bg-gradient-to-r from-sky-500 to-emerald-500 text-slate-50 shadow-md shadow-emerald-500/30 scale-[1.02]'
-          : 'bg-slate-900/60 text-slate-300 hover:bg-slate-800'
-      }`}
-    >
-      <Icon size={16} />
-      <span>{label}</span>
-    </button>
-  );
-}
-
-/* Right-hand insights panel */
-function InsightsSidebar({ activeTab }) {
-  let title = '';
-  let bullets = [];
-  let tag = '';
-
-  switch (activeTab) {
-    case 'budget':
-      title = 'Budget guardrails';
-      tag = 'Everyday money';
-      bullets = [
-        'Aim for roughly 50% needs, 30% wants, 20% savings/debt payoff. It will flex month to month.',
-        'If your needs are heavy right now, start by pushing wants down—small cuts beat no plan.',
-        'Any positive leftover is a win. Automate moving part of it to savings or debt.'
-      ];
-      break;
-    case 'auto':
-      title = 'Car payment sanity checks';
-      tag = 'Big purchases';
-      bullets = [
-        'Many people aim for car payments ≤ 10–15% of net take-home pay.',
-        'Add insurance, gas, and maintenance when you think about the “real” cost.',
-        'A solid used car with a cheaper payment often beats stretching for new.'
-      ];
-      break;
-    case 'mortgage':
-      title = 'Homebuying guardrails';
-      tag = 'Housing';
-      bullets = [
-        'Lenders typically care about % of gross income. You live on net income, not gross.',
-        'Keep total housing ideally around 30–35% of take-home pay if you want room to breathe.',
-        'Don’t drain every dollar into the down payment—emergency cash still matters.'
-      ];
-      break;
-    case 'debt':
-      title = 'Getting to debt-free faster';
-      tag = 'Debt strategy';
-      bullets = [
-        'Avalanche = lowest interest cost. Snowball = more motivation via quick wins.',
-        'Protect essentials first: housing, food, utilities, minimum payments—then add extra.',
-        'Consistency beats perfection. A small, automatic extra payment adds up over time.'
-      ];
-      break;
-    case 'savings':
-      title = 'Let compounding work for you';
-      tag = 'Investing basics';
-      bullets = [
-        'Time in the market usually matters more than perfect timing of the market.',
-        'Even small monthly contributions can grow meaningfully over 10–20 years.',
-        'Match the return assumption to your risk comfort—this is only a rough illustration.'
-      ];
-      break;
-    case 'roi':
-      title = 'Real-estate lens';
-      tag = 'Investor view';
-      bullets = [
-        'Cap rate = property return if you paid all cash. It ignores financing.',
-        'Cash-on-cash focuses on your actual cash invested (down, closing, rehab).',
-        'DSCR compares NOI to your loan payments. Many lenders like ≥ 1.20—higher is safer.'
-      ];
-      break;
-    default:
-      break;
-  }
-
-  return (
-    <aside className="hidden lg:flex flex-col gap-4">
-      <div className="rounded-2xl border border-slate-800 bg-slate-950/90 shadow-[0_18px_60px_rgba(15,23,42,0.7)] p-4">
-        <div className="flex items-center justify-between mb-2">
-          <span className="inline-flex items-center gap-1 rounded-full bg-slate-900 px-2 py-1 text-[10px] font-medium text-slate-300 border border-slate-700/70">
-            <BarChart3 size={12} /> {tag || 'Money tips'}
-          </span>
-          <span className="text-[10px] text-slate-500 flex items-center gap-1">
-            <Info size={12} />
-            Context only, not advice
-          </span>
-        </div>
-        <h3 className="text-sm font-semibold text-slate-50 mb-2">
-          {title || 'MoneyMap insights'}
-        </h3>
-        <ul className="space-y-2 text-[11px] text-slate-300 leading-relaxed">
-          {bullets.map((b, idx) => (
-            <li key={idx} className="flex gap-2">
-              <span className="mt-[3px] inline-block h-1.5 w-1.5 rounded-full bg-emerald-400" />
-              <span>{b}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <div className="rounded-2xl border border-slate-800 bg-slate-950/80 p-4 text-[10px] text-slate-400 space-y-2">
-        <p className="font-semibold text-slate-200 text-xs">
-          Reminder
-        </p>
-        <p>
-          MoneyMap is a sandbox. It is not financial advice and does not know
-          your full situation. Use it to pressure-test ideas before you make
-          decisions in the real world.
-        </p>
-      </div>
-    </aside>
-  );
-}
 
 export default FinancialCalculatorApp;
