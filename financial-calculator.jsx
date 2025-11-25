@@ -136,6 +136,7 @@ function RealEstateRoiCalculator() {
   const years = parseNumber(loanTermYears);
 
   let results = null;
+  let projections = null;
 
   if (P > 0 && years > 0) {
     const loanAmount = P * (1 - dpPct);
@@ -181,6 +182,21 @@ function RealEstateRoiCalculator() {
       cashOnCash,
       dscr,
     };
+
+    // Simple multi-year view assuming Year 1 cash flow stays constant.
+    const projectionYears = [3, 5, 10];
+    projections = projectionYears.map((y) => {
+      const cumulativeCashFlow = annualCashFlow * y;
+      const cumulativeCoC =
+        totalCashInvested > 0
+          ? cumulativeCashFlow / totalCashInvested
+          : 0;
+      return {
+        years: y,
+        cumulativeCashFlow,
+        cumulativeCoC,
+      };
+    });
   }
 
   return (
@@ -319,9 +335,60 @@ function RealEstateRoiCalculator() {
                   <RoiMetricTile
                     label="Annual cash flow"
                     value={roiCurrency(results.annualCashFlow)}
-                    emphasize={results.annualCashFlow < 0 ? 'bad' : 'good'}
+                    emphasize={
+                      results.annualCashFlow < 0 ? 'bad' : 'good'
+                    }
                   />
                 </div>
+
+                {/* Multi-year snapshot */}
+                {projections && (
+                  <div className="mt-5 rounded-2xl bg-slate-900/90 border border-slate-800 p-4">
+                    <h4 className="text-xs font-semibold tracking-wide uppercase text-slate-300 mb-2">
+                      Multi-year view (simple, using Year 1 cash flow)
+                    </h4>
+                    <div className="overflow-x-auto text-xs">
+                      <table className="w-full border-collapse">
+                        <thead>
+                          <tr className="text-slate-400">
+                            <th className="text-left py-1 pr-3 font-medium">
+                              Years
+                            </th>
+                            <th className="text-right py-1 pr-3 font-medium">
+                              Cumulative cash flow
+                            </th>
+                            <th className="text-right py-1 font-medium">
+                              Cumulative cash-on-cash
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {projections.map((p) => (
+                            <tr
+                              key={p.years}
+                              className="border-t border-slate-800"
+                            >
+                              <td className="py-1 pr-3 text-slate-200">
+                                {p.years} years
+                              </td>
+                              <td className="py-1 pr-3 text-right font-mono text-slate-100">
+                                {roiCurrency(p.cumulativeCashFlow)}
+                              </td>
+                              <td className="py-1 text-right font-mono text-emerald-300">
+                                {roiPercent(p.cumulativeCoC)}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                    <p className="mt-2 text-[10px] text-slate-400">
+                      This keeps NOI and loan terms constant, just to show how
+                      cash flow stacks up over 3, 5, and 10 years. Real life
+                      will move with vacancies, rent changes, and repairs.
+                    </p>
+                  </div>
+                )}
 
                 <hr className="my-4 border-slate-800" />
 
@@ -371,7 +438,6 @@ function RealEstateRoiCalculator() {
     </div>
   );
 }
-
 function RoiField({ label, value, onChange, prefix, suffix }) {
   return (
     <label className="flex flex-col gap-1 text-sm text-slate-200">
